@@ -1,0 +1,12 @@
+
+*.mod
+*.o
+*.a
+
+boxindex
+boxinf
+boxscan
+fileinf
+gestas
+simplediff
+
