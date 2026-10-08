@@ -1,0 +1,36 @@
+
+#	initial values for state variables
+
+ 1    0.05   ! AMMONIUM NITROGEN
+ 2    0.50   ! NITRATE NITROGEN
+ 3    0.047  ! ORTHOPHOSPHATE PHOSPHORUS
+ 4    14.0   ! DISSOLVED OXYGEN
+ 5    1.75   ! DIATOMS CARBON
+ 6    0.020  ! ZOOPLANKTON CARBON
+ 7    0.000  ! ZOOPLANKTON NITROGEN
+ 8    0.0000 ! ZOOPLANKTON PHOSPHORUS
+ 9    6.5    ! DETRITUS PARTICULATE ORG. CARBON
+10    1.0    ! DETRITUS PARTICULATE ORG. NITROGEN
+11    0.015  ! DETRITUS PARTICULATE ORG. PHOSPHORUS
+12    8.0    ! DISSOLVED ORGANIC CARBON
+13    1.5    ! DISSOLVED ORGANIC NITROGEN
+14    0.025  ! DISSOLVED ORGANIC PHOSPHORUS
+15    0.06   ! NON FIXING CYANOBACTERIA CARBON
+16    0.022  ! OTHER PHYTOPLANKTON CARBON
+17    3.0    ! DISSOLOVED SILICA
+18    1.5    ! PARTICULATE SILICA
+19    0.00   ! FIXING CYANOBACTERIA CARBON
+20    0.0027 ! INORG CARBON CARBON
+21    0.0027 ! TOTAL ALKALNITY
+22    0.23   ! Iron charged as plus 2
+23    0.55   ! Iron chargen as plus 3
+24    0.1    ! Manganese charged as plus 2
+25    0.1    ! Manganese charged as plus 4
+26    70.    ! Calcium
+27    15.    ! Magnesium
+28    1.35   ! Sulphur 6+ (Sulphate sulphur)   
+29    0.0    ! Sulphur 2- (Sulphide sulphur)   
+30    0.0    ! Methane carbon
+31    0.0    ! Nostocales
+32    8.0    ! Akinetes g/m^2
+

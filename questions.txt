@@ -1,0 +1,15 @@
+
+is TIME used internally, or is only TIME_STEP important?
+TIME has to start with 1?
+TIME is in units of days?
+
+if I have real solar radiation for every time step, should I use:
+    DRIVING_FUNCTIONS(:,3 ) =  real_rad ! Available light [W/m**2]
+    DRIVING_FUNCTIONS(:,4 ) =    1.0D0  ! Fraction of day [0-1]
+
+are all state variables advected?
+
+most important question:
+
+what are the units of the state variables 1-32???
+
