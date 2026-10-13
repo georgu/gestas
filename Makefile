@@ -57,6 +57,8 @@ EXES_BFM = bfm_util test_bfm boxcompare
 default: weutro $(EXES)
 #default: $(LIB) $(EXES)
 
+all: default
+
 $(AQUABCLIB):
 weutro:
 	cd $(WEUTRODIR); make
@@ -99,6 +101,7 @@ clean:
 	-rm -f *.mod
 	-rm -f ggg hhh
 	-rm -f *.tmp *.bak
+	$(FEMBIN)/recursivemake $@ $(SUBDIRS)
 
 cleanall: clean
 	-rm -f $(DIR)*.zip

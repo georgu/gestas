@@ -139,14 +139,23 @@
 	double precision verr
 
 	integer is,ib
+	double precision aarea,rain,evap
 	double precision vdiff,vaver,vaaver,vadiff
 	double precision volume(nbox)
 
 	volume = vold
 
+!-------------------------------------------------------
+! some debug
+!-------------------------------------------------------
+
 	do is=1,nsect
-	  !write(6,*) isect(:,is)
+	  !write(6,*) is,isect(:,is)
 	end do
+
+!-------------------------------------------------------
+! loop over sections to compute new volume
+!-------------------------------------------------------
 
 	do is=1,nsect
 	  ib = isect(1,is)	! box from
@@ -160,6 +169,10 @@
 	    volume(ib) = volume(ib) - dt*flux(3,is)
 	  end if
 	end do
+
+!-------------------------------------------------------
+! for old version we had extra section for the boundary conditions
+!-------------------------------------------------------
 
 	if( nvers_file <= 5 ) then
 	  do is=1,nosect
@@ -176,6 +189,21 @@
 	  end do
 	end if
 
+!-------------------------------------------------------
+! consider rain and evaporation (not working yet)
+!-------------------------------------------------------
+
+	do ib=1,nbox
+	  aarea = area(ib)
+	  rain = meteo(6,ib)
+	  evap = meteo(7,ib)
+	  !volume(ib) = volume(ib) + aarea * dt * ( rain - evap )
+	end do
+
+!-------------------------------------------------------
+! compute volume error
+!-------------------------------------------------------
+
 	vaaver = 0.
 	vadiff = 0.
 	do ib=1,nbox
@@ -187,6 +215,10 @@
 	end do
 
 	verr = vadiff / vaaver
+
+!-------------------------------------------------------
+! end of routine
+!-------------------------------------------------------
 
 	end
 
@@ -839,7 +871,7 @@
 	  allocate(lmeteo(nbox,nmeteo))
 	  call scalar_out_header(iubase+1,'solar radiation [W/m**2]')
 	  call scalar_out_header(iubase+2,'air temperature [C]')
-	  call scalar_out_header(iubase+3,'realtive humidity [%]')
+	  call scalar_out_header(iubase+3,'relative humidity [%]')
 	  call scalar_out_header(iubase+4,'wind speed [m/s]')
 	  call scalar_out_header(iubase+5,'cloud cover [0-1]')
 

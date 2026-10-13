@@ -12,6 +12,13 @@
 ! ...
 ! nbox scal_1 scal_2 scal_3 ... state_nscal
 !
+! or
+!
+! 0    scal_1 scal_2 scal_3 ... state_nscal
+!
+! if the first value is 0 it will set the initial values for all boxes the same
+! in this case no other lines are allowed in the file
+!
 ! comments lines start with #
 
 	implicit none
@@ -41,6 +48,12 @@
 	  n = n - 1
 	  if( n /= nscal ) goto 99
 	  ib = nint(vals(0))
+	  if( ib == 0 ) then		!set all boxes to the same values
+	    do ib=1,nbox
+	      val(ib,:) = vals(1:nscal)
+	    end do
+	    exit			!we are done - do not read more lines
+	  end if
 	  if( ib /= ibox ) goto 98
 	  val(ibox,:) = vals(1:nscal)
 	  if( ibox == nbox ) exit
@@ -270,6 +283,115 @@
 	read(1,'(a)') first
 	close(1)
 
+	end
+
+!************************************************************
+!************************************************************
+!************************************************************
+
+	subroutine read_input_file_names(nscal,nbound
+     &			,param_file,init_file,bound_files)
+
+! reads file input_file_names.txt and looks for input files
+
+	implicit none
+
+	integer nscal,nbound
+	character*80 param_file
+	character*80 init_file
+	character*80 bound_files(nbound)
+
+	logical bex,bdebug
+	integer iline,i,in,ios,ibound
+	double precision d(1)
+	character*80 file
+	character*80 string
+
+	integer iscand
+
+	file = 'input_files.txt'
+
+	bdebug = .true.
+	iline = 0
+	param_file = ' '
+	init_file = ' '
+	bound_files = ' '
+
+	inquire(file=file,exist=bex)
+	if( .not. bex ) goto 99
+
+	open(1,file=file,status='old',form='formatted',iostat=ios)
+	if( ios /= 0 ) goto 98
+
+	do
+	  iline = iline + 1
+	  read(1,'(a)',iostat=ios) string
+	  if( ios > 0 ) goto 98
+	  if( ios < 0 ) exit
+	  if( string == ' ' ) cycle		!empty line
+	  if( string(1:1) == '#' ) cycle	!comment
+	  i = index(string,':')
+	  if( i == 0 ) goto 97
+	  if( string(1:i-1) == 'param' ) then
+	    param_file = adjustl(string(i+1:))
+	  else if( string(1:i-1) == 'init' ) then
+	    init_file = adjustl(string(i+1:))
+	  else if( string(1:5) == 'bound' ) then
+	    in = iscand(string(6:i-1),d,1)
+	    if( in /= 1 ) goto 96
+	    ibound = nint(d(1))
+	    if( ibound < 1 .or. ibound > nbound ) goto 95
+	    bound_files(ibound) = adjustl(string(i+1:))
+	  end if
+	end do
+
+	close(1)
+
+	if( .not. bdebug ) return
+
+	write(6,*) 'param: ',trim(param_file)
+	write(6,*) 'init: ',trim(init_file)
+	write(6,*) 'bound: '
+	do i=1,nbound
+	  write(6,*) i,trim(bound_files(i))
+	end do
+
+	file = param_file
+	inquire(file=file,exist=bex)
+	if( .not. bex ) goto 99
+	file = init_file
+	inquire(file=file,exist=bex)
+	if( .not. bex ) goto 99
+	do i=1,nbound
+	  file = bound_files(i)
+	  inquire(file=file,exist=bex)
+	  if( .not. bex ) goto 99
+	end do
+	
+	return
+   95	continue
+	write(6,*) 'boundary number out of range: ',trim(file)
+	write(6,*) 'boundary number: ',ibound
+	write(6,*) 'line number: ',iline
+	write(6,*) 'line: ',trim(string)
+	stop 'error stop read_input_file_names: boundary number'
+   96	continue
+	write(6,*) 'error reading number of boundary: ',trim(file)
+	write(6,*) 'line number: ',iline
+	write(6,*) 'line: ',trim(string)
+	stop 'error stop read_input_file_names: parsing boundary'
+   97	continue
+	write(6,*) 'error parsing line: ',trim(file)
+	write(6,*) 'line number: ',iline
+	write(6,*) 'line: ',trim(string)
+	stop 'error stop read_input_file_names: parsing error'
+   98	continue
+	write(6,*) 'error reading file: ',trim(file)
+	write(6,*) 'line number: ',iline
+	stop 'error stop read_input_file_names: read error'
+   99	continue
+	write(6,*) 'file is not existing: ',trim(file)
+	stop 'error stop read_input_file_names: no such file'
 	end
 
 !************************************************************

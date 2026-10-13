@@ -117,7 +117,7 @@
 
 	subroutine scalar_stability(stabmin)
 
-! advects all scalar variables
+! computes stabilty index for boxes
 
 	use boxes
 	use boxes_scalar
@@ -131,7 +131,9 @@
 	integer ibstabmin
 	real vaux,faux,stab
 	double precision pos,neg
-	double precision fluxbox(-nosect:nbox)
+	double precision fluxbox(2,-nosect:nbox)
+
+!	1 is into box, 2 is out of box
 
 	fluxbox = 0
 
@@ -140,15 +142,18 @@
           it = isect(2,is)      ! box to
 	  pos = dt*flux(2,is)
 	  neg = dt*flux(3,is)
-          fluxbox(if) = fluxbox(if) + neg - pos
-          fluxbox(it) = fluxbox(it) + pos - neg
+          fluxbox(1,if) = fluxbox(1,if) + neg
+          fluxbox(1,it) = fluxbox(1,it) + pos
+          fluxbox(2,if) = fluxbox(2,if) + pos
+          fluxbox(2,it) = fluxbox(2,it) + neg
 	end do
 
 	stabmin = 1.e+30
 	ibstabmin = 0
 	do ib = 1,nbox
 	  vaux = min(vold(ib),vnew(ib))
-	  faux = abs(fluxbox(ib))
+	  faux = max(fluxbox(1,ib),fluxbox(2,ib))
+	  faux = abs(faux)
 	  stab = vaux/faux
 	  if( stab < stabmin ) then
 	    stabmin = stab
@@ -199,9 +204,7 @@
 	  if( iadv(is) == 0 ) cycle			!no advection
 	  s(1:nbox) = scal(1:nbox,is)
 	  s(-nosect:0) = scal_bound(-nosect:0,is)
-	  !call scalar_print('advect before:',is,s)
 	  call scalar_advect_single(is,s)
-	  !call scalar_print('advect after:',is,s)
 	  scal(1:nbox,is) = s(1:nbox)
 	end do
 
@@ -233,29 +236,10 @@
         do is=1,nsect
           if = isect(1,is)      ! box from
           it = isect(2,is)      ! box to
-	  !bdebug = ( if == -1 )
 	  pos = dt*flux(2,is)
 	  neg = dt*flux(3,is)
-	  if( bdebug ) then
-	    write(6,*) '~~~~~~~~~~~~~~~~~~~~~~~'
-	    write(6,*) iscal
-	    write(6,*) if,it
-	    write(6,*) 'pos,neg: ',pos,neg
-	    vaux = 0
-	    if( if > 0 ) vaux = vold(if)
-	    write(6,*) 'vol: ',vaux,vold(it)
-	    write(6,*) 's before: ',s(if),s(it)
-	    write(6,*) 'mass flux: ',neg*s(it) - pos*s(if)
-	    write(6,*) 'mass before: ',mass(if),mass(it)
-	  end if
           mass(if) = mass(if) + neg*s(it) - pos*s(if)
           mass(it) = mass(it) + pos*s(if) - neg*s(it)
-	  if( bdebug ) then
-	    vaux = 1.
-	    write(6,*) 'mass after: ',mass(if),mass(it)
-	    write(6,*) 's after: ',mass(if)/vaux,mass(it)/vnew(it)
-	    write(6,*) '~~~~~~~~~~~~~~~~~~~~~~~'
-	  end if
         end do
 
 	if( nvers_file <= 5 ) then
@@ -297,11 +281,10 @@
 	integer i
 	character*80 formhead
 
-	write(iu,'(a,a)') '# ',trim(what)
-
 	formhead = ' '
 	write(formhead,'(a,i2,a)') '(a,',nscal,'(a,i2.2))'
 
+	write(iu,'(a,a)') '# ',trim(what)
 	write(iu,formhead) '#        dtime'
      +		,('        scalar',i,i=1,nscal)
 
@@ -351,15 +334,15 @@
 
 	integer iu
 	character*(*) what
+	integer nscal
 
-	integer i
+	integer i,is
 	character*80 formhead
-
-	write(iu,'(a,a)') '# ',trim(what)
 
 	formhead = ' '
 	write(formhead,'(a,i2,a)') '(a,',nbox,'(a,i2.2))'
 
+	write(iu,'(a,a)') '# ',trim(what)
 	write(iu,formhead) '#      date_and_time'
      +		,('    box',i,i=1,nbox)
 
@@ -382,7 +365,8 @@
 	integer is,i,iu
 	character*80 format
 
-	write(format,'(a,i4,a)') '(a20,',nbox,'f9.3)'
+	!write(format,'(a,i4,a)') '(a20,',nbox,'f9.3)'
+	write(format,'(a,i4,a)') '(a20,',nbox,'f9.4)'
 
 	do is=1,nscal
 	  iu = iubase + is
@@ -414,5 +398,7 @@
 
 	end
 
+!************************************************************
+!************************************************************
 !************************************************************
 

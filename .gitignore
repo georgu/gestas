@@ -2,6 +2,10 @@
 *.mod
 *.o
 *.a
+.*.swp
+
+arc/
+tmp/
 
 boxindex
 boxinf

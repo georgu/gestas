@@ -7,6 +7,9 @@
 
 	integer, save :: my_id = 0
 
+	integer, save :: nkn_local = 0
+	integer, save :: nkn_global = 0
+
         INTERFACE shympi_gather_and_sum
         MODULE PROCEDURE  shympi_gather_and_sum_i &
      &                   ,shympi_gather_and_sum_r 
