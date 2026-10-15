@@ -24,7 +24,7 @@
 	double precision, save :: timestabtot = 0	!stability index time
 	double precision, save :: stabtot = 1.e+30	!stability index value
 
-	logical, save :: bwrt = .false.		!water residence time
+	logical, save :: bwrt = .true.		!water residence time
 	logical, save :: bconz = .false.	!concentrations
 	logical, save :: bbfm = .false.		!bfm model
 	logical, save :: bsteady = .false.	!steady state
@@ -225,13 +225,19 @@
 
 	logical bdebug
 	integer if,it,is,ib
-	double precision pos,neg,vaux
+	double precision pos,neg,smax
 	double precision mass(-nosect:nbox)
+	double precision vaux(1:nbox)
+	double precision sold(-nosect:nbox)
 
 	bdebug = .false.
 
 	mass = 0.
-	mass(1:nbox) = vold(1:nbox) * s(1:nbox)
+	vaux = vold
+	vaux = 0.5* (vold + vnew)
+	!mass(1:nbox) = vold(1:nbox) * s(1:nbox)
+	mass(1:nbox) = vaux(1:nbox) * s(1:nbox)
+	sold = s
 
         do is=1,nsect
           if = isect(1,is)      ! box from
@@ -259,7 +265,15 @@
 	!  end do
 	!end if
 
-	s(1:nbox) = mass(1:nbox) / vnew(1:nbox)
+	!s(1:nbox) = mass(1:nbox) / vnew(1:nbox)
+	vaux = vnew
+	vaux = 0.5* (vold + vnew)
+	s(1:nbox) = mass(1:nbox) / vaux(1:nbox)
+
+	if( blimit ) then
+	  smax = maxval(sold)
+	  where( s > smax ) s = smax
+	end if
 
 	end
 	
@@ -317,8 +331,9 @@
 	  mass(is) = m
 	end do
 
-	write(format,'(a,i4,a)') '(f14.3,',nscal,'e16.6)'
-	write(iu,format) dtime,mass
+	!write(format,'(a,i4,a)') '(f14.3,',nscal,'e16.6)'
+	write(format,'(a,i4,a)') '(a,',nscal,'e16.6)'
+	write(iu,format) pline,mass
 
 	end
 	
@@ -370,7 +385,7 @@
 
 	do is=1,nscal
 	  iu = iubase + is
-	  write(iu,format) stime,scal(:,is)
+	  write(iu,format) pline,scal(:,is)
 	end do
 
 	end

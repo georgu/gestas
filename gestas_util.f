@@ -286,6 +286,28 @@
 	end
 
 !************************************************************
+
+	subroutine make_max_file(filename,iubase,n,outfile)
+
+! make filename of max file
+
+	implicit none
+
+	character*(*) filename
+	integer iubase			!base unit
+	integer n			!max number of files
+	character*(*) outfile
+
+	integer iu
+        character*80 text
+
+        iu = iubase + n
+        write(text,'(i3)') iu
+        outfile = trim(filename) // adjustl(text)
+
+	end
+
+!************************************************************
 !************************************************************
 !************************************************************
 
@@ -372,6 +394,7 @@
    95	continue
 	write(6,*) 'boundary number out of range: ',trim(file)
 	write(6,*) 'boundary number: ',ibound
+	write(6,*) 'possible min/max boundary number: ',1,nbound
 	write(6,*) 'line number: ',iline
 	write(6,*) 'line: ',trim(string)
 	stop 'error stop read_input_file_names: boundary number'

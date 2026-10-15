@@ -5,6 +5,8 @@ DIR = gestas
 
 #-----------------------------------------------------------
 
+MAKEFLAGS += --no-print-directory
+
 FEMBIN = $(HOME)/shyfem/bin
 MAKEDEPEND = $(FEMBIN)/mkdp.pl
 MODDIR = .
@@ -13,9 +15,13 @@ SUBDIRS = bfm test data weutro
 
 DATE=`date +%Y-%m-%d`
 
+FGNU_BOUNDS = -fcheck=all
+TRAP_LIST = zero,invalid,overflow
+FGNU_NOOPT = -g -fbacktrace -ffpe-trap=$(TRAP_LIST) $(FGNU_BOUNDS)
+
 F77 = gfortran
 FFLAGS = -g -fimplicit-none
-FFLAGS = -g -fimplicit-none -fcheck=all
+FFLAGS = -g -fimplicit-none $(FGNU_NOOPT)
 LFLAGS =
 
 WHAT = weutro
@@ -44,6 +50,7 @@ OBJS2 = gestas.o gestas_util.o \
 		gestas_scalar.o gestas_wrt.o gestas_conz.o \
 		gestas_steady.o \
 		gestas_weutro.o \
+		gestas_perpetual.o \
 
 		#gestas_aquabc.o \
 		#gestas_bfm.o \
@@ -76,7 +83,7 @@ boxscan: boxscan.f
 	gfortran -o $@ $@.f
 
 gestas: $(WHAT) $(OBJS)
-	$(F77) $(LFLAGS) $(OBJS) $(LIB) $(LIB) -o $@
+	$(F77) $(LFLAGS) $(OBJS) $(LIB) -o $@
 
 test_bfm: test_bfm.o
 	gfortran -o $@ $(MODULES) $(BFMOBJS) $(NETCDFLIB) $@.f

@@ -19,13 +19,15 @@
 
         integer, parameter :: nscal = 3		!total number of scalars
 
-        integer, save :: iubase = 20		!unit for output
+        integer, save :: iubase = 200		!unit for output
+        integer, save :: iumass = 920		!unit for mass output
 
 	logical, parameter :: bgoro = .false.	!goro application
 
 	!double precision, save :: dtwrt = 90	!reset time for WRT (in days)
 	!double precision, save :: dtwrt = 20	!reset time for WRT (in days)
-	double precision, save :: dtwrt = 180	!reset time for WRT (in days)
+	!double precision, save :: dtwrt = 180	!reset time for WRT (in days)
+	double precision, save :: dtwrt = 90	!reset time for WRT (in days)
 	double precision, save :: wrtmax = 999	!maximum for WRT
 
 	integer, save :: iadv(nscal) = 1	!advection of scalars
@@ -61,10 +63,14 @@
 	implicit none
 
 	call wrt_boundary_condition
-	call scalar_advect(nscal,iadv,scal,scal_bound)
+	!write(667,*) dtime,1,maxval(scal(:,3))
 	call wrt_react
-	call wrt_custom
-	call scalar_mass(iubase,nscal,scal)
+	!write(667,*) dtime,2,maxval(scal(:,3))
+	call scalar_advect(nscal,iadv,scal,scal_bound)
+	!write(667,*) dtime,3,maxval(scal(:,3))
+	!write(667,*) dtime,4,maxval(scal_bound(:,3))
+	call wrt_custom					!this is for goro
+	call scalar_mass(iumass,nscal,scal)
 	call scalar_out(iubase,nscal,scal)
 
 	end
@@ -79,10 +85,17 @@
 
 	implicit none
 
+	character*80 text
+
+        call make_max_file('fort.201-fort.',200,9,text)
+
+
 	write(6,*) 'water residence time (WRT) module has been run'
 	if( bgoro ) then
 	  write(6,*) 'special setting for Goro has been used'
 	end if
+	write(6,*) 'results for wrt module are in '//trim(text)
+	write(6,*) 'total mass for wrt module is in ',iumass
 
 	end
 
@@ -121,7 +134,7 @@
 
 	ifrqwrt = nint( spd * dtwrt / dt )	!frequency of reset
 
-	iu = iubase
+	iu = iumass
 	call scalar_mass_header(iu,nscal,'total mass for WRT')
 
 	iu = iubase
@@ -177,7 +190,7 @@
 	implicit none
 
 	scal_bound = 0.
-	scal_bound(-1,2) = 1.		!OBC for confinement
+	scal_bound(-nbound:0,2) = 1.		!OBC for confinement
 
 	end
 	
@@ -197,16 +210,26 @@
 	double precision rl(nbox)
 	character*80 format
 
+!--------------------------------------------------------
+! compute parameters
+!--------------------------------------------------------
+
 	iacc = iacc + 1
+
+	!if( iacc > 10 ) stop 'forced stop in wrt_react'
 
 	time = dtime - dtime_reset
 	tacu = tacu + time*time
+
+!--------------------------------------------------------
+! compute parameters
+!--------------------------------------------------------
 
 	rl = -log(scal(:,1))
 	where( scal(:,1) <= 0. ) rl = 0.
 	where( scal(:,1) >= 1. ) rl = 0.
 	wrtlog(:,1) = wrtlog(:,1) + rl*time
-	rl = -log(1.-scal(:,2))
+	where( scal(:,2) < 1. ) rl = -log(1.-scal(:,2))
 	where( scal(:,2) <= 0. ) rl = 0.
 	where( scal(:,2) >= 1. ) rl = 0.
 	wrtlog(:,2) = wrtlog(:,2) + rl*time
@@ -219,6 +242,13 @@
 	wrtacc(:,1) = wrtacc(:,1) + dt*scal(:,1)		!WRT
 	wrtacc(:,2) = wrtacc(:,2) + dt*(1.-scal(:,2))		!confinement
 	scal(:,3) = scal(:,3) + dt / spd			!age
+	!scal(:,3) = scal(:,3) + dt			!age
+
+	!write(666,*) dtime,iacc,scal(2,3)
+
+!--------------------------------------------------------
+! output results
+!--------------------------------------------------------
 
 	if( iacc == ifrqwrt ) then
 	  write(format,'(a,i4,a)') '(a20,',nbox,'f8.2)'
@@ -241,6 +271,10 @@
 	  write(iu+3,format) stime,scal(:,3)
 	  call wrt_reset	!resets all vars, also iacc
 	end if
+
+!--------------------------------------------------------
+! end of routine
+!--------------------------------------------------------
 
 	end
 

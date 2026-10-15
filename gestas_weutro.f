@@ -139,7 +139,7 @@
         call weutro_boundary_conditions
         if( badvect ) call scalar_advect(nscal,iadv,scal,scal_bound)
         call weutro_react
-        call scalar_mass(iubase,nscal,scal)
+        call scalar_mass(iumass,nscal,scal)
         call scalar_out(iubase,nscal,scal)
 
 	end
@@ -155,7 +155,13 @@
 
 	implicit none
 
+        character*80 text
+
+        call make_max_file('fort.301-fort.',300,nscal,text)
+
 	write(6,*) 'weutro module has successfully finished'
+	write(6,*) 'results for weutro module are in '//trim(text)
+        write(6,*) 'total mass for weutro computation is in ',iumass
 
 	end
 	
