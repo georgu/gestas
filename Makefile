@@ -51,6 +51,8 @@ OBJS2 = gestas.o gestas_util.o \
 		gestas_steady.o \
 		gestas_weutro.o \
 		gestas_perpetual.o \
+		gestas_read.o \
+		gestas_out.o \
 
 		#gestas_aquabc.o \
 		#gestas_bfm.o \
