@@ -12,6 +12,7 @@ MAKEDEPEND = $(FEMBIN)/mkdp.pl
 MODDIR = .
 
 SUBDIRS = bfm test data weutro
+SUBDIRS = bfm weutro
 
 DATE=`date +%Y-%m-%d`
 
