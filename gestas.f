@@ -25,7 +25,7 @@
 
 !------------------------------------------------------------
 !
-! box model gestas - administration and reading of files
+! box model gestas - administration of box model
 !
 ! info :
 !
@@ -48,6 +48,28 @@
 
 	implicit none
 
+	logical, save :: bpe = .false.	  !use rain/evap for mass error
+        logical, save :: blimit = .false. !limit concentration
+        logical, save :: badvect = .true. !advect concentration
+
+	!integer, save :: imax = 50	!maximum number of time steps
+	integer, save :: imax = 0	!maximum number of time steps
+
+	!integer, parameter :: ifreq = 1    !frequency of output (every time)
+	!integer, parameter :: ifreq = 24   !frequency of output (daily)
+	!integer, parameter :: ifreq = 168  !frequency of output (weekly)
+	integer, parameter :: ifreq = 730  !frequency of output (monthly)
+	!integer, parameter :: ifreq = 8766 !frequency of output (yearly)
+
+	double precision, save :: ptime0 = 0
+	double precision, save :: pextra = 3600	!if not full year available
+	double precision, save :: pyear = 1	!how many years to simulate
+	character*20, save :: pline		!date for perpetual year
+
+!------------------------------------------------------------
+! do not change anything beyond this point
+!------------------------------------------------------------
+
 	integer, save :: nvers_file = 0	!version of files
 
 	integer, save :: nbox = 0	!total number of boxes
@@ -56,26 +78,10 @@
 	integer, save :: nbound = -1	!total number of OB boundaries
 	double precision, save :: dt = 0.
 
-	logical, save :: bpe = .false.	 !use rain/evap for mass error
-        logical, save :: blimit = .true. !limit concentration
-
-	integer, save :: imax = 0	!maximum number of time steps
 	integer, save :: irec = 0
-
-	!integer, parameter :: ifreq = 1    !frequency of output (every time)
-	!integer, parameter :: ifreq = 24   !frequency of output (daily)
-	!integer, parameter :: ifreq = 168  !frequency of output (weekly)
-	integer, parameter :: ifreq = 730  !frequency of output (monthly)
-	!integer, parameter :: ifreq = 8766 !frequency of output (yearly)
 
 	integer, save :: date0,time0
 	double precision, save :: atime0
-
-	!double precision, save :: ptime
-	double precision, save :: ptime0 = 0
-	double precision, save :: pextra = 3600	!if not full year available
-	double precision, save :: pyear = 1	!how many years to simulate
-	character*20, save :: pline		!date for perpetual year
 
 	double precision, save :: dtime
 	double precision, save :: dlast
@@ -131,11 +137,10 @@
 	call read_stats
 	call initialize_time
 	call get_open_boundary_conditions
+	call check_bound(nbound,nosect)
 	call alloc_arrays
 	call read_zinit
-	write(6,*) 'before scalar init'
 	call scalar_init
-	write(6,*) 'after scalar init'
 
 	write(6,*) 'running with time step ',dt
 
@@ -326,7 +331,6 @@
 	allocate(cspeed(nbox))
 
 	allocate(flux(3,nsect))
-
 	allocate(meteo(8,nbox))
 
 	write(6,*) 'finished allocating arrays'
@@ -350,6 +354,28 @@
 	  write(6,*) trim(text)
 	  stop 'error stop check_version: inconsistent nvers'
 	end if
+
+	end
+
+!************************************************************
+
+	subroutine check_bound(nbound,nosect)
+
+	implicit none
+
+	integer nbound
+	integer nosect
+
+        if( nbound < 0 ) then
+          write(6,*) 'nbound = ',nbound
+          write(6,*) 'nbound not initialized'
+          stop 'error stop check_bound: nbound<0'
+        else if( nosect /= nbound ) then
+          write(6,*) 'nbound = ',nbound
+          write(6,*) 'nosect = ',nosect
+          write(6,*) 'nbound and nosect are different'
+          stop 'error stop check_bound: nbound/=nosect'
+        end if
 
 	end
 

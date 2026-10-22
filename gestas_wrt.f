@@ -1,13 +1,47 @@
 
+!--------------------------------------------------------------------------
+!
+!    Copyright (C) 2024-2026  Georg Umgiesser
+!
+!    This file is part of GESTAS.
+!
+!    GESTAS is free software: you can redistribute it and/or modify
+!    it under the terms of the GNU General Public License as published by
+!    the Free Software Foundation, either version 3 of the License, or
+!    (at your option) any later version.
+!
+!    GESTAS is distributed in the hope that it will be useful,
+!    but WITHOUT ANY WARRANTY; without even the implied warranty of
+!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!    GNU General Public License for more details.
+!
+!    You should have received a copy of the GNU General Public License
+!    along with SHYFEM. Please see the file COPYING in the main directory.
+!    If not, see <http://www.gnu.org/licenses/>.
+!
+!    Contributions to this file can be found below in the revision log.
+!
+!--------------------------------------------------------------------------
+
 !------------------------------------------------------------
 !
 ! box model gestas - WRT (water residence time) computations
 !
 ! this simulates the water residence time and age of the water
 !
-!	scal(:,1)	WRT
-!	scal(:,2)	confinement
+!	scal(:,1)	concentration for WRT
+!	scal(:,2)	concentration for confinement
 !	scal(:,3)	age
+!
+!	fort.201	concentration for WRT
+!	fort.202	concentration for confinement
+!	fort.203	age
+!	fort.204	WRT computed through integration
+!	fort.205	confinement computed through integration
+!	fort.206	nothing usefull
+!	fort.207	WRT computed through logarithmic regression
+!	fort.208	confinement computed through logarithmic regression
+!	fort.209	nothing usefull
 !
 !------------------------------------------------------------
 
@@ -63,12 +97,8 @@
 	implicit none
 
 	call wrt_boundary_condition
-	!write(667,*) dtime,1,maxval(scal(:,3))
 	call wrt_react
-	!write(667,*) dtime,2,maxval(scal(:,3))
 	call scalar_advect(nscal,iadv,scal,scal_bound)
-	!write(667,*) dtime,3,maxval(scal(:,3))
-	!write(667,*) dtime,4,maxval(scal_bound(:,3))
 	call wrt_custom					!this is for goro
 	call scalar_mass(iumass,nscal,scal)
 	call scalar_out(iubase,nscal,scal)
@@ -88,7 +118,6 @@
 	character*80 text
 
         call make_max_file('fort.201-fort.',200,9,text)
-
 
 	write(6,*) 'water residence time (WRT) module has been run'
 	if( bgoro ) then
@@ -216,8 +245,6 @@
 
 	iacc = iacc + 1
 
-	!if( iacc > 10 ) stop 'forced stop in wrt_react'
-
 	time = dtime - dtime_reset
 	tacu = tacu + time*time
 
@@ -227,11 +254,11 @@
 
 	rl = -log(scal(:,1))
 	where( scal(:,1) <= 0. ) rl = 0.
-	where( scal(:,1) >= 1. ) rl = 0.
+	where( scal(:,1) >= 1. ) rl = 1.
 	wrtlog(:,1) = wrtlog(:,1) + rl*time
 	where( scal(:,2) < 1. ) rl = -log(1.-scal(:,2))
 	where( scal(:,2) <= 0. ) rl = 0.
-	where( scal(:,2) >= 1. ) rl = 0.
+	where( scal(:,2) >= 1. ) rl = 1.
 	wrtlog(:,2) = wrtlog(:,2) + rl*time
 
 	where( scal(:,1) < 0. ) scal(:,1) = 0.
@@ -241,10 +268,8 @@
 
 	wrtacc(:,1) = wrtacc(:,1) + dt*scal(:,1)		!WRT
 	wrtacc(:,2) = wrtacc(:,2) + dt*(1.-scal(:,2))		!confinement
-	scal(:,3) = scal(:,3) + dt / spd			!age
-	!scal(:,3) = scal(:,3) + dt			!age
-
-	!write(666,*) dtime,iacc,scal(2,3)
+	scal(:,3) = scal(:,3) + dt / spd			!age [days]
+	!scal(:,3) = scal(:,3) + dt				!age [s]
 
 !--------------------------------------------------------
 ! output results

@@ -1,10 +1,36 @@
 
+!--------------------------------------------------------------------------
+!
+!    Copyright (C) 2024-2026  Georg Umgiesser
+!
+!    This file is part of GESTAS.
+!
+!    GESTAS is free software: you can redistribute it and/or modify
+!    it under the terms of the GNU General Public License as published by
+!    the Free Software Foundation, either version 3 of the License, or
+!    (at your option) any later version.
+!
+!    GESTAS is distributed in the hope that it will be useful,
+!    but WITHOUT ANY WARRANTY; without even the implied warranty of
+!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!    GNU General Public License for more details.
+!
+!    You should have received a copy of the GNU General Public License
+!    along with SHYFEM. Please see the file COPYING in the main directory.
+!    If not, see <http://www.gnu.org/licenses/>.
+!
+!    Contributions to this file can be found below in the revision log.
+!
+!--------------------------------------------------------------------------
+
 !------------------------------------------------------------
 !
 ! box model gestas - concentration computations
 !
 ! general tracer computation routines
-! boundary conditions must be initialized in conz_boundary_condition()
+!
+! concentration inputs are from every boundary separately
+! concentration nbound+1 uses input from all boundaries
 !
 !------------------------------------------------------------
 
@@ -14,11 +40,11 @@
 
         implicit none
 
-        integer, parameter :: nscal = 4			!total number of scalars
+        integer, save :: nscal = 0			!total number of scalars
 
-	integer, save :: iubase = 40			!unit for output
+	integer, save :: iubase = 400			!unit for output
 
-        integer, save :: iadv(nscal) = 1                !advection of scalars
+        integer, save, allocatable :: iadv(:)           !advection of scalars
 
 !	-----------------------------------------------------
 
@@ -72,21 +98,20 @@
 	integer iu,is
 	character*80 what
 
-	if( nscal /= nbound ) then
-	  write(6,*) 'nscal,nbound: ',nscal,nbound
-	  stop 'error stop conz_init: nscal /= nbound'
-	end if
-
 	if( nbound < 0 ) then
 	  write(6,*) 'nbound = ',nbound
 	  write(6,*) 'number of open boundary conditions not initialized'
 	  stop 'error stop conz_init: nbound'
 	end if
 
+	nscal = nbound + 1
+
 	allocate(scal(nbox,nscal))
 	allocate(scal_bound(-nbound:0,nscal))
+	allocate(iadv(nscal))
 	scal = 0.
 	scal_bound = 0.
+	iadv = 1
 
         iu = iubase
         call scalar_mass_header(iu,nscal,'total mass for concentration')
@@ -116,8 +141,9 @@
 
 	scal_bound = 0.
 	do i=1,nbound
-	  scal_bound(-i,i) = 1.		!OBC for concentration
+	  scal_bound(-i,i) = 1.			!single conz per boundary
 	end do
+	scal_bound(-nbound:-1,nscal) = 1.	!all bounds with this OBC
 
 	end
 

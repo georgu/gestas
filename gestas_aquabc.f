@@ -1,7 +1,31 @@
 
+!--------------------------------------------------------------------------
+!
+!    Copyright (C) 2024-2026  Georg Umgiesser
+!
+!    This file is part of GESTAS.
+!
+!    GESTAS is free software: you can redistribute it and/or modify
+!    it under the terms of the GNU General Public License as published by
+!    the Free Software Foundation, either version 3 of the License, or
+!    (at your option) any later version.
+!
+!    GESTAS is distributed in the hope that it will be useful,
+!    but WITHOUT ANY WARRANTY; without even the implied warranty of
+!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!    GNU General Public License for more details.
+!
+!    You should have received a copy of the GNU General Public License
+!    along with SHYFEM. Please see the file COPYING in the main directory.
+!    If not, see <http://www.gnu.org/licenses/>.
+!
+!    Contributions to this file can be found below in the revision log.
+!
+!--------------------------------------------------------------------------
+
 !------------------------------------------------------------
 !
-! box model gestas - aqua_bc model
+! box model gestas - aqua_bc ecological model
 !
 !------------------------------------------------------------
 
@@ -14,7 +38,7 @@
         integer, parameter :: nscal = 32	!total number of scalars
         integer, parameter :: nforce = 10	!total number of forcings
 
-        integer, save :: iubase = 200			!unit for output
+        integer, save :: iubase = 500			!unit for output
 
         integer, save :: iadv(nscal) = 1                !advection of scalars
 

@@ -1,7 +1,31 @@
 
+!--------------------------------------------------------------------------
+!
+!    Copyright (C) 2024-2026  Georg Umgiesser
+!
+!    This file is part of GESTAS.
+!
+!    GESTAS is free software: you can redistribute it and/or modify
+!    it under the terms of the GNU General Public License as published by
+!    the Free Software Foundation, either version 3 of the License, or
+!    (at your option) any later version.
+!
+!    GESTAS is distributed in the hope that it will be useful,
+!    but WITHOUT ANY WARRANTY; without even the implied warranty of
+!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!    GNU General Public License for more details.
+!
+!    You should have received a copy of the GNU General Public License
+!    along with SHYFEM. Please see the file COPYING in the main directory.
+!    If not, see <http://www.gnu.org/licenses/>.
+!
+!    Contributions to this file can be found below in the revision log.
+!
+!--------------------------------------------------------------------------
+
 !------------------------------------------------------------
 !
-! box model gestas - scalar variables
+! box model gestas - handle scalar variables
 !
 ! administers runs with various scalar variables
 ! provides common routines advect, mass, output
@@ -9,6 +33,8 @@
 ! to add a new module do the following:
 !	new logical variable (e.g., bwrt)
 !	new calls in scalar_init, scalar_run, scalar_finalize
+!
+! more than one module can be run together
 !
 !------------------------------------------------------------
 
@@ -25,7 +51,7 @@
 	double precision, save :: stabtot = 1.e+30	!stability index value
 
 	logical, save :: bwrt = .true.		!water residence time
-	logical, save :: bconz = .false.	!concentrations
+	logical, save :: bconz = .true.		!concentrations
 	logical, save :: bbfm = .false.		!bfm model
 	logical, save :: bsteady = .false.	!steady state
 	logical, save :: baqua_bc = .false.	!aquabc model
@@ -129,28 +155,33 @@
 	integer is,ib
 	integer if,it
 	integer ibstabmin
-	real vaux,faux,stab
+	real vaux,faux,stab,alpha
 	double precision pos,neg
 	double precision fluxbox(2,-nosect:nbox)
+	double precision qin(-nosect:nbox)
 
 !	1 is into box, 2 is out of box
 
 	fluxbox = 0
+	qin = 0
 
         do is=1,nsect
           if = isect(1,is)      ! box from
           it = isect(2,is)      ! box to
-	  pos = dt*flux(2,is)
-	  neg = dt*flux(3,is)
-          fluxbox(1,if) = fluxbox(1,if) + neg
-          fluxbox(1,it) = fluxbox(1,it) + pos
-          fluxbox(2,if) = fluxbox(2,if) + pos
-          fluxbox(2,it) = fluxbox(2,it) + neg
+	  pos = flux(2,is)
+	  neg = flux(3,is)
+          qin(if) = qin(if) + neg
+          qin(it) = qin(it) + pos
+          fluxbox(1,if) = fluxbox(1,if) + dt*neg
+          fluxbox(1,it) = fluxbox(1,it) + dt*pos
+          fluxbox(2,if) = fluxbox(2,if) + dt*pos
+          fluxbox(2,it) = fluxbox(2,it) + dt*neg
 	end do
 
 	stabmin = 1.e+30
 	ibstabmin = 0
 	do ib = 1,nbox
+	  alpha = dt * qin(ib) / vnew(ib)
 	  vaux = min(vold(ib),vnew(ib))
 	  faux = max(fluxbox(1,ib),fluxbox(2,ib))
 	  faux = abs(faux)
@@ -158,6 +189,12 @@
 	  if( stab < stabmin ) then
 	    stabmin = stab
 	    ibstabmin = ib
+	  end if
+	  if( alpha > 1 ) then
+	    write(6,*) 'stability error: alpha > 1 ',alpha
+	    write(6,*) stime
+	    write(6,*) fluxbox(1,ib),vnew(ib)
+	    stop 'error stop scalar_stability: alpha > 1'
 	  end if
 	  !write(6,*) 'stability: ',ib,vaux,faux,stab
 	end do
@@ -192,7 +229,6 @@
 	double precision s(-nosect:nbox)
 
 	call scalar_stability(stab)
-	!write(6,*) 'stability index for boxes: ',stab
 
 	if( stab < 1. ) then
 	  write(6,*) 'stability index: ',stab
@@ -225,28 +261,31 @@
 
 	logical bdebug
 	integer if,it,is,ib
-	double precision pos,neg,smax
-	double precision mass(-nosect:nbox)
-	double precision vaux(1:nbox)
+	double precision pos,neg,smax,smin
+	double precision qpos,qneg,qdiff
+	double precision mold(-nosect:nbox)
+	double precision mnew(-nosect:nbox)
+	double precision macc(-nosect:nbox)
 	double precision sold(-nosect:nbox)
 
 	bdebug = .false.
 
-	mass = 0.
-	vaux = vold
-	vaux = 0.5* (vold + vnew)
-	!mass(1:nbox) = vold(1:nbox) * s(1:nbox)
-	mass(1:nbox) = vaux(1:nbox) * s(1:nbox)
 	sold = s
+	mold = 0.
+	mnew = 0.
+	macc = 0.
+	mold(1:nbox) = vold(1:nbox) * s(1:nbox)
 
         do is=1,nsect
           if = isect(1,is)      ! box from
           it = isect(2,is)      ! box to
-	  pos = dt*flux(2,is)
-	  neg = dt*flux(3,is)
-          mass(if) = mass(if) + neg*s(it) - pos*s(if)
-          mass(it) = mass(it) + pos*s(if) - neg*s(it)
+	  qpos = dt*flux(2,is)*s(if)
+	  qneg = dt*flux(3,is)*s(it)
+	  qdiff = qpos - qneg
+          macc(if) = macc(if) + qneg - qpos
+          macc(it) = macc(it) + qpos - qneg
         end do
+
 
 	if( nvers_file <= 5 ) then
           do is=1,nosect
@@ -254,8 +293,8 @@
             it = iosect(2,is)      ! box to
 	    pos = dt*oflux(2,is)
 	    neg = dt*oflux(3,is)
-            mass(if) = mass(if) + neg*s(it) - pos*s(if)
-            mass(it) = mass(it) + pos*s(if) - neg*s(it)
+            macc(if) = macc(if) + neg*s(it) - pos*s(if)
+            macc(it) = macc(it) + pos*s(if) - neg*s(it)
           end do
 	end if
 
@@ -265,14 +304,14 @@
 	!  end do
 	!end if
 
-	!s(1:nbox) = mass(1:nbox) / vnew(1:nbox)
-	vaux = vnew
-	vaux = 0.5* (vold + vnew)
-	s(1:nbox) = mass(1:nbox) / vaux(1:nbox)
+	mnew(:) = mold(:) + macc(:)
+	s(1:nbox) = mnew(1:nbox) / vnew(1:nbox)
 
 	if( blimit ) then
 	  smax = maxval(sold)
+	  smin = minval(sold)
 	  where( s > smax ) s = smax
+	  where( s < smin ) s = smin
 	end if
 
 	end
@@ -331,7 +370,6 @@
 	  mass(is) = m
 	end do
 
-	!write(format,'(a,i4,a)') '(f14.3,',nscal,'e16.6)'
 	write(format,'(a,i4,a)') '(a,',nscal,'e16.6)'
 	write(iu,format) pline,mass
 
@@ -380,7 +418,6 @@
 	integer is,i,iu
 	character*80 format
 
-	!write(format,'(a,i4,a)') '(a20,',nbox,'f9.3)'
 	write(format,'(a,i4,a)') '(a20,',nbox,'f9.4)'
 
 	do is=1,nscal
@@ -393,6 +430,8 @@
 !************************************************************
 
 	subroutine scalar_print(text,is,s)
+
+! print scalars
 
 	use boxes
 

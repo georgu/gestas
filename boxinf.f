@@ -1,9 +1,35 @@
 
-!***************************************************************
+!--------------------------------------------------------------------------
 !
-! boxinf - routine to check one and compare two box files
+!    Copyright (C) 2024-2026  Georg Umgiesser
 !
-!***************************************************************
+!    This file is part of GESTAS.
+!
+!    GESTAS is free software: you can redistribute it and/or modify
+!    it under the terms of the GNU General Public License as published by
+!    the Free Software Foundation, either version 3 of the License, or
+!    (at your option) any later version.
+!
+!    GESTAS is distributed in the hope that it will be useful,
+!    but WITHOUT ANY WARRANTY; without even the implied warranty of
+!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!    GNU General Public License for more details.
+!
+!    You should have received a copy of the GNU General Public License
+!    along with SHYFEM. Please see the file COPYING in the main directory.
+!    If not, see <http://www.gnu.org/licenses/>.
+!
+!    Contributions to this file can be found below in the revision log.
+!
+!--------------------------------------------------------------------------
+
+!------------------------------------------------------------
+!
+! box model gestas - routine to check one and compare two box files
+!
+!------------------------------------------------------------
+
+!************************************************************
 
 	module mod_boxinf
 
@@ -23,7 +49,7 @@
 
 	end module mod_boxinf
 
-!***************************************************************
+!************************************************************
 
 	program boxinf
 
@@ -58,7 +84,7 @@
 
 	end
 
-!***************************************************************
+!************************************************************
 
 	subroutine read_box_file
 
@@ -279,7 +305,7 @@
 
 	end
 
-!***************************************************************
+!************************************************************
 
 	subroutine compare_box_files(ierr)
 
@@ -445,7 +471,7 @@
 
 	end
 
-!*****************************************************
+!************************************************************
 
 	subroutine compare_values(type,n1,n2,vals1,vals2,rerr)
 
@@ -494,7 +520,7 @@
 	
 	end
 
-!*****************************************************
+!************************************************************
 
 	subroutine handle_time(nrec,dtime,aline)
 
@@ -525,7 +551,7 @@
 
 	end
 
-!*****************************************************
+!************************************************************
 
 	subroutine compute_rain(vals)
 
@@ -543,7 +569,7 @@
 
 	end
 	
-!*****************************************************
+!************************************************************
 
 	subroutine make_formats(ftype,sh,format,format77,formatb)
 
@@ -589,7 +615,7 @@
 
 	end
 
-!*****************************************************
+!************************************************************
 
         subroutine aver3dbox(nbox,nval,nval3d,lmax,lbmax
      &				,boxvals3d,vals2d,boxvals)
@@ -628,7 +654,7 @@
 
 	end
 
-!*****************************************************
+!************************************************************
 
         subroutine aver3dflux(nsect,lmax,isvals
      &				,sectvals3d,sectvals)
@@ -654,7 +680,7 @@
 
 	end
 
-!*****************************************************
+!************************************************************
 
 	subroutine combine_2d_fluxes(iu,nbox,nsect,nobs,isvals,iovals
      &					,sectvals,obcvals
@@ -691,7 +717,7 @@
 
 	end
 
-!*****************************************************
+!************************************************************
 
 	subroutine compare_params(text,n1,n2)
 
@@ -706,7 +732,7 @@
 
 	end
 
-!*****************************************************
+!************************************************************
 
 	subroutine debug_isvals(iu,nsect,isvals)
 
@@ -725,7 +751,7 @@
 
 	end
 
-!*****************************************************
+!************************************************************
 
 	subroutine debug_boxvals(iu,aline,nbox,nvar,boxvals)
 
@@ -745,7 +771,7 @@
 
 	end
 
-!*****************************************************
+!************************************************************
 
         subroutine boxinf_init
 
@@ -788,5 +814,5 @@
 
         end
 
-!*****************************************************
+!************************************************************
 

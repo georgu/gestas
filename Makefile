@@ -58,7 +58,7 @@ OBJS2 = gestas.o gestas_util.o \
 		#gestas_bfm.o \
 
 OBJS = $(OBJS1) $(OBJS2)
-EXES = boxinf fileinf boxindex gestas boxscan simplediff
+EXES = boxinf boxindex boxscan gestas fileinf simplediff
 EXES_BFM = bfm_util test_bfm boxcompare
 
 #-----------------------------------------------------------
