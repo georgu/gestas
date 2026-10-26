@@ -183,18 +183,24 @@
 	character*80, save :: wparam_out = 'weutro_out.txt'
 
 	logical bexist
+	logical bwrite
 	integer iu
 
-	write(6,*) 'initializing parameters for weutro'
+	bwrite = .false.
+	bwrite = .true.
+
+	if( bwrite ) write(6,*) 'initializing parameters for weutro'
 
 	call param_init		!read hard coded paramer list
 
 	if( param_file == ' ' ) then
-	  write(6,*) 'initializing weutro with standard parameters'
+	  if( bwrite ) write(6,*) 'initializing weutro with standard parameters'
 	else
 	  inquire(file=param_file,exist=bexist)
 	  if( bexist ) then
-	    write(6,*) 'reading weutro parameter file: ',trim(param_file)
+	    if( bwrite ) then
+	      write(6,*) 'reading weutro parameter file: ',trim(param_file)
+	    end if
 	    call read_weutro_param(param_file)
 	  else
 	    write(6,*) 'file not existing: ',trim(param_file)
@@ -202,7 +208,8 @@
 	  end if
 	end if
 
-	write(6,*) 'writing weutro parameters: ',trim(wparam_out)
+	if( bwrite ) write(6,*) 'writing weutro parameters: ',trim(wparam_out)
+
 	iu = 1
 	open(iu,file=wparam_out,status='unknown',form='formatted')
 	call write_weutro_param(iu)

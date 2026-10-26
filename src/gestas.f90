@@ -160,9 +160,6 @@
 	call read_zinit
 	call scalar_init
 
-	bout = ifreq == 0
-	iheader = 30*max(1,ifreq)
-
 	if( .not. bquiet ) then
 	  write(6,*) 'running with time step ',dt
 
@@ -181,9 +178,7 @@
 	  if( ierr /= 0 ) exit
 	  irec = irec + 1
 	  call check_volume(verr)
-	  if( ifreq /= 0 ) bout = ( mod(irec,ifreq) == 0 )
-	  if( mod(irec,iheader) == 0 ) write(6,*) trim(header)
-	  if( bout ) write(6,*) irec,dtime,pline,sngl(verr)
+	  call hydro_write_to_terminal(verr)
 	  call hydro_out
 	  call meteo_out
 	  call fluxes_out
@@ -219,6 +214,28 @@
 
 !************************************************************
 
+	subroutine hydro_write_to_terminal(verr)
+
+	use boxes
+
+	implicit none
+
+	logical bout
+	integer iheader
+	double precision verr
+
+	iheader = 30*max(1,ifreq)
+
+	if( ifreq == 0 ) return
+
+	if( mod(irec,iheader) == 0 ) write(6,*) trim(header)
+	bout = ( mod(irec,ifreq) == 0 )
+	if( bout ) write(6,*) irec,dtime,pline,sngl(verr)
+
+	end
+
+!************************************************************
+
 	subroutine hydro_finalize
 
 	use boxes
@@ -228,12 +245,15 @@
 	integer n
 	character*80 text
 
+	if( bquiet ) return
+
 	call make_max_file('fort.',700,nsect,text)
 
-	write(6,*) 'results for water variables are in fort.101-fort.104'
-	write(6,*) 'results for meteo variables are in fort.105-fort.109'
-	write(6,*) 'fluxes between boxes are in fort.701-' // trim(text)
-	write(6,*) 'averages over boxes are in fort.911 and fort.912'
+	write(6,*) 'hydro module has been run'
+	write(6,*) '  results for water variables are in fort.101-fort.104'
+	write(6,*) '  results for meteo variables are in fort.105-fort.109'
+	write(6,*) '  fluxes between boxes are in fort.701-' // trim(text)
+	write(6,*) '  averages over boxes are in fort.911 and fort.912'
 
 	end
 
@@ -360,7 +380,7 @@
 	allocate(flux(3,nsect))
 	allocate(meteo(8,nbox))
 
-	write(6,*) 'finished allocating arrays'
+	if( .not. bquiet ) write(6,*) 'finished allocating arrays'
 
 	end
 
@@ -427,8 +447,10 @@
 	call date_format(atime0,aline)
 	call date_set_reference(atime0)
 
-	write(6,*) 'reference time: ',aline
-	write(6,*) date0,time0,atime0
+	if( .not. bquiet ) then
+	  write(6,*) 'reference time: ',aline
+	  write(6,*) date0,time0,atime0
+	end if
 
 	call lintp_set_reference(atime0)
 
@@ -520,6 +542,8 @@
 	    ifreq = 0
 	  else if( bverbose ) then
 	    ifreq = 1
+	    ifreq = 730
+	    ifreq = 168
 	  else
 	    ifreq = 730
 	  end if

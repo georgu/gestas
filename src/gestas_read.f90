@@ -81,7 +81,7 @@
 
 	nbound = nob
 	nosect = nob
-	write(6,*) 'open boundary conditions: ',nbound
+	if( .not. bsilent ) write(6,*) 'open boundary conditions: ',nbound
 
 	end
 
@@ -492,8 +492,8 @@
 	
 	close(iu)
 
-	write(6,*) 'nbox,nsect: ',nbox,nsect
-	write(6,*) 'finished reading ',trim(file)
+	if( .not. bsilent ) write(6,*) 'nbox,nsect: ',nbox,nsect
+	if( .not. bquiet ) write(6,*) 'finished reading ',trim(file)
 
 	return
    97	continue
@@ -558,7 +558,7 @@
 
 	close(iu)
 
-	write(6,*) 'finished reading ',trim(file)
+	if( .not. bquiet ) write(6,*) 'finished reading ',trim(file)
 
 	end
 

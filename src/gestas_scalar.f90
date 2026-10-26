@@ -70,7 +70,7 @@
 
 	implicit none
 
-	write(6,*) 'initializing scalars'
+	if( .not. bquiet ) write(6,*) 'initializing scalars'
 
 	if( bwrt ) call wrt_init
 	if( bconz ) call conz_init
@@ -79,7 +79,7 @@
 	if( baquabc ) call aqua_bc_init
 	if( bweutro ) call weutro_init
 
-	write(6,*) 'finished initializing scalars'
+	if( .not. bquiet ) write(6,*) 'finished initializing scalars'
 
 	end
 	
@@ -120,7 +120,9 @@
 	double precision atime
 	character*20 aline
 
-	write(6,*) 'the following modules have been run:'
+	if( .not. bquiet ) then
+	  write(6,*) 'the following scalar modules have been run:'
+	end if
 
 	if( bwrt ) call wrt_finalize
 	if( bconz ) call conz_finalize
@@ -132,8 +134,8 @@
         atime = atime0 + timestabtot
         call date_format(atime,aline)
 
-	write(6,*) 'the minimum stability index is ',stabtot
-	write(6,*) 'box ',ibstabtot,'   time ',trim(aline)
+	if( .not. bsilent ) write(6,*) 'minimum stability index: ',stabtot
+	if( bverbose ) write(6,*) 'box ',ibstabtot,'   time ',trim(aline)
 
 	end
 	

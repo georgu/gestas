@@ -99,7 +99,7 @@
 	character*80 text
 	character*4 svar
 
-        write(6,*) 'initializing weutro: ',nscal
+        if( .not. bquiet ) write(6,*) 'initializing weutro: ',nscal
 
 !       -----------------------------------------------------
 !	allocate and initialize arrays
@@ -184,11 +184,13 @@
 
         character*80 text
 
+	if( bquiet ) return
+
         call make_max_file('fort.301-fort.',300,nscal,text)
 
-	write(6,*) 'weutro module has successfully finished'
-	write(6,*) 'results for weutro module are in '//trim(text)
-        write(6,*) 'total mass for weutro computation is in ',iumass
+	write(6,*) 'weutro module has been run'
+	write(6,*) '  results for weutro module are in '//trim(text)
+        write(6,*) '  total mass for weutro module is in ',iumass
 
 	end
 	

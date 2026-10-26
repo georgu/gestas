@@ -43,6 +43,7 @@
         integer, save :: nscal = 0			!total number of scalars
 
 	integer, save :: iubase = 400			!unit for output
+	integer, save :: iumass = 940			!unit for mass output
 
         integer, save, allocatable :: iadv(:)           !advection of scalars
 
@@ -80,7 +81,19 @@
 
 ! finalizes concentration module
 
+	use boxes
+	use boxes_conz
+
+        character*80 text
+
+	if( bquiet ) return
+
+        call make_max_file('fort.401-fort.',200,nscal+1,text)
+
         write(6,*) 'concentration module has been run'
+        write(6,*) '  results for conz module are in '//trim(text)
+        write(6,*) '  total mass for conz module is in ',iumass
+
 
         end
 
@@ -113,7 +126,7 @@
 	scal_bound = 0.
 	iadv = 1
 
-        iu = iubase
+        iu = iumass
         call scalar_mass_header(iu,nscal,'total mass for concentration')
 
 	do is=1,nscal
@@ -122,7 +135,7 @@
           call scalar_out_header(iu,what)
 	end do
 
-	write(6,*) 'finished initializing conz: ',nscal
+	if( .not. bquiet ) write(6,*) 'finished initializing conz: ',nscal
 
 	end
 	

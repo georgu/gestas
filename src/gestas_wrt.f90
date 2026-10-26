@@ -111,20 +111,23 @@
 
 ! finalizes WRT module
 
+	use boxes
 	use boxes_wrt
 
 	implicit none
 
 	character*80 text
 
+	if( bquiet ) return
+
         call make_max_file('fort.201-fort.',200,9,text)
 
 	write(6,*) 'water residence time (WRT) module has been run'
 	if( bgoro ) then
-	  write(6,*) 'special setting for Goro has been used'
+	  write(6,*) '  special setting for Goro has been used'
 	end if
-	write(6,*) 'results for wrt module are in '//trim(text)
-	write(6,*) 'total mass for wrt module is in ',iumass
+	write(6,*) '  results for wrt module are in '//trim(text)
+	write(6,*) '  total mass for wrt module is in ',iumass
 
 	end
 
@@ -182,7 +185,9 @@
 	call scalar_out_header(iu+2,'confinement [days] (log)')
 	call scalar_out_header(iu+3,'water age [days] (snap shot)')
 
-	write(6,*) 'finished initializing wrt: ',nscal,ifrqwrt
+	if( .not. bquiet ) then
+	  write(6,*) 'finished initializing wrt: ',nscal,ifrqwrt
+	end if
 
 	end
 	
@@ -296,6 +301,7 @@
 	  write(iu+2,format) stime,scal(:,2)
 	  write(iu+3,format) stime,scal(:,3)
 	  call wrt_reset	!resets all vars, also iacc
+	  if( bverbose ) write(6,*) 'resetting concentrations at ',pline
 	end if
 
 !--------------------------------------------------------

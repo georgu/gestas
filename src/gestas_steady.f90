@@ -27,7 +27,7 @@
 !
 ! box model gestas - steady state computations
 !
-! this runs scalar simulations to see how long it takes to steady state
+! this runs scalar simulations to see how long it takes to reach steady state
 !
 ! boundary conditions are set to 100
 ! initial conditions are set to 0 and 200
@@ -42,7 +42,8 @@
 
         integer, parameter :: nscal = 2		!total number of scalars
 
-	integer, save :: iubase = 50		!unit for output
+	integer, save :: iubase = 150		!unit for output
+	integer, save :: iumass = 915		!unit for output of mass
 
 	double precision, save :: sinit1 = 0.		!initial for scalar 1
 	double precision, save :: sinit2 = 200.		!initial for scalar 2
@@ -73,7 +74,7 @@
 	call steady_boundary_condition
 	call scalar_advect(nscal,iadv,scal,scal_bound)
 	call steady_react
-	call scalar_mass(iubase,nscal,scal)	!writes to iubase
+	call scalar_mass(iumass,nscal,scal)	!writes to iubase
 	call scalar_out(iubase,nscal,scal)	!writes to iubase+iscal
 
 	end
@@ -82,9 +83,21 @@
 
         subroutine steady_finalize
 
+	use boxes
+	use boxes_steady
+
 ! finalizes steady module
 
+        character*80 text
+
+	if( bquiet ) return
+
+        call make_max_file('fort.151-fort.',150,3,text)
+
         write(6,*) 'steady state module has been run'
+        write(6,*) '  results for steady module are in '//trim(text)
+        write(6,*) '  total mass for wrt module is in ',iumass
+
 
         end
 
@@ -115,15 +128,15 @@
 	scal(:,1) = sinit1
 	scal(:,2) = sinit2
 
-        iu = iubase
+        iu = iumass
         call scalar_mass_header(iu,nscal,'total mass for steady')
 
         iu = iubase
         call scalar_out_header(iu+1,'steady scalar low init')
         call scalar_out_header(iu+2,'steady scalar high init')
-        call scalar_out_header(iu+9,'steady scalar difference')
+        call scalar_out_header(iu+3,'steady scalar difference')
 
-	write(6,*) 'finished initializing steady: ',nscal
+	if( .not. bquiet ) write(6,*) 'finished initializing steady: ',nscal
 
 	end
 	
@@ -161,10 +174,9 @@
 
 	sdiff = ( scal(:,2) - scal(:,1) ) / sbound
 	
-	iu = iubase + 9
+	iu = iubase + 3
         write(format,'(a,i4,a)') '(a20,',nbox,'f8.2)'
 	write(iu,format) stime,sdiff(:)
-	!write(iu,*) stime,sdiff
 
 	end
 
