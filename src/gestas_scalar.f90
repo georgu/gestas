@@ -50,12 +50,12 @@
 	double precision, save :: timestabtot = 0	!stability index time
 	double precision, save :: stabtot = 1.e+30	!stability index value
 
-	logical, save :: bwrt = .true.		!water residence time
-	logical, save :: bconz = .true.		!concentrations
-	logical, save :: bbfm = .false.		!bfm model
-	logical, save :: bsteady = .false.	!steady state
-	logical, save :: baqua_bc = .false.	!aquabc model
-	logical, save :: bweutro = .true.	!weutro model
+	!logical, save :: bwrt = .true.		!water residence time
+	!logical, save :: bconz = .true.		!concentrations
+	!logical, save :: bbfm = .false.		!bfm model
+	!logical, save :: bsteady = .false.	!steady state
+	!logical, save :: baqua_bc = .false.	!aquabc model
+	!logical, save :: bweutro = .true.	!weutro model
 
 !============================================================
         end module boxes_scalar
@@ -74,9 +74,9 @@
 
 	if( bwrt ) call wrt_init
 	if( bconz ) call conz_init
-	!if( bbfm ) call bfm_init
+	if( bbfm ) call bfm_init
 	if( bsteady ) call steady_init
-	!if( baqua_bc ) call aqua_bc_init
+	if( baquabc ) call aqua_bc_init
 	if( bweutro ) call weutro_init
 
 	write(6,*) 'finished initializing scalars'
@@ -98,9 +98,9 @@
 
 	if( bwrt ) call wrt_run
 	if( bconz ) call conz_run
-	!if( bbfm ) call bfm_run
+	if( bbfm ) call bfm_run
 	if( bsteady ) call steady_run
-	!if( baqua_bc ) call aqua_bc_run
+	if( baquabc ) call aqua_bc_run
 	if( bweutro ) call weutro_run
 
 	end
@@ -124,9 +124,9 @@
 
 	if( bwrt ) call wrt_finalize
 	if( bconz ) call conz_finalize
-	!if( bbfm ) call bfm_finalize
+	if( bbfm ) call bfm_finalize
 	if( bsteady ) call steady_finalize
-	!if( baqua_bc ) call aqua_bc_finalize
+	if( baquabc ) call aqua_bc_finalize
 	if( bweutro ) call weutro_finalize
 
         atime = atime0 + timestabtot
@@ -338,8 +338,8 @@
 	write(formhead,'(a,i2,a)') '(a,',nscal,'(a,i2.2))'
 
 	write(iu,'(a,a)') '# ',trim(what)
-	write(iu,formhead) '#        dtime'
-     +		,('        scalar',i,i=1,nscal)
+        write(iu,formhead) '#        dtime'                             &
+     &          ,('        scalar',i,i=1,nscal)
 
 	end
 
@@ -396,8 +396,8 @@
 	write(formhead,'(a,i2,a)') '(a,',nbox,'(a,i2.2))'
 
 	write(iu,'(a,a)') '# ',trim(what)
-	write(iu,formhead) '#      date_and_time'
-     +		,('    box',i,i=1,nbox)
+        write(iu,formhead) '#      date_and_time'                       &
+     &          ,('    box',i,i=1,nbox)
 
 	end
 

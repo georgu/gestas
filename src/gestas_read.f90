@@ -53,8 +53,8 @@
 	open(iu,file=file,status='old',form='formatted')
 	call check_file_header(iu,2,nvers,ierr)
 	if( ierr < 0 ) then
-	  stop 'error stop get_open_boundary_conditions: ' //
-     &			'reading boxes_2d.txt'
+          stop 'error stop get_open_boundary_conditions: ' //           &
+     &                  'reading boxes_2d.txt'
 	end if
 	call check_version('get_open_boundary_conditions',nvers)
 
@@ -444,8 +444,8 @@
 	call check_file_exists(file)
 	open(iu,file=file,status='old',form='formatted',err=99)
 	call check_file_header(iu,8,nvers,ierr)
-	if( ierr < 0 ) stop 'error stop read_stats: ' //
-     &			'reading boxes_stats.txt'
+        if( ierr < 0 ) stop 'error stop read_stats: ' //                &
+     &                  'reading boxes_stats.txt'
 	call check_version('read_stats',nvers)
 
 	bvers3 = ( nvers == 3 )
@@ -527,8 +527,8 @@
 	call check_file_exists(file)
 	open(iu,file=file,status='old',form='formatted')
 	call check_file_header(iu,0,nvers,ierr)
-	if( ierr < 0 ) stop 'error stop read_zinit: ' //
-     &			'reading boxes_init.txt'
+        if( ierr < 0 ) stop 'error stop read_zinit: ' //                &
+     &                  'reading boxes_init.txt'
 	call check_version('read_zinit',nvers)
 
 	read(iu,*)

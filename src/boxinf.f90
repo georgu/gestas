@@ -158,8 +158,8 @@
 	end if
 	call make_formats(ftype,sh,format,format77,formatb)
 
-	call get_box_dimensions(iu,ftype,nbox,nvar
-     &				,nsect,nobc,lmax,ierr)
+        call get_box_dimensions(iu,ftype,nbox,nvar                      &
+     &                          ,nsect,nobc,lmax,ierr)
 	nobs = abs(nobc)
 	if( ierr /= 0 ) stop 'error stop: cannot determine dimensions'
 
@@ -226,10 +226,10 @@
 	  end if
 
 	  if( b3d ) then	!average of layers
-            call aver3dbox(nbox,nvar,nvar3d,lmax,lbmax
-     &				,boxvals3d,vals2d,boxvals)
-            call aver3dflux(nsect,lmax,isvals
-     &				,sectvals3d,sectvals)
+            call aver3dbox(nbox,nvar,nvar3d,lmax,lbmax                  &
+     &                          ,boxvals3d,vals2d,boxvals)
+            call aver3dflux(nsect,lmax,isvals                           &
+     &                          ,sectvals3d,sectvals)
 	  end if
 
 	  acum(:,:) = acum(:,:) + boxvals(:,:)
@@ -249,9 +249,9 @@
 	    nvar2d = 7
 	    call write_time_record(iuw,dtime,aline)
 	    call write_box_records_2d(iuw,nbox,nvar2d,boxvals)
-	    call combine_2d_fluxes(iu,nbox,nsect,nobs,isvals,iovals
-     &					,sectvals,obcvals
-     &					,nout,isout,sectout)
+            call combine_2d_fluxes(iu,nbox,nsect,nobs,isvals,iovals     &
+     &                                  ,sectvals,obcvals               &
+     &                                  ,nout,isout,sectout)
 	    call write_flux_records_2d(iuw,nout,isout,sectout)
 	  end if
 	end do
@@ -387,11 +387,11 @@
 	end if
 	call make_formats(ftype,sh,format,format77,formatb)
 
-	call get_box_dimensions(iu1,ftype,nbox,nvar
-     &				,nsect,nobc,lmax,ierr1)
+        call get_box_dimensions(iu1,ftype,nbox,nvar                     &
+     &                          ,nsect,nobc,lmax,ierr1)
 	nobs = abs(nobc)
-	call get_box_dimensions(iu2,ftype,nbox2,nvar2
-     &				,nsect2,nobc2,lmax2,ierr2)
+        call get_box_dimensions(iu2,ftype,nbox2,nvar2                   &
+     &                          ,nsect2,nobc2,lmax2,ierr2)
 	nobs2 = abs(nobc2)
 	if( ierr1 /= 0 .or. ierr2 /= 0 ) then
 	  write(6,*) ierr1,ierr2
@@ -440,8 +440,8 @@
 	    if( bobs ) then
 	      call read_flux_2d(iu1,nsect,isvals1,sectvals1)
 	      call read_flux_2d(iu2,nsect,isvals2,sectvals2)
-	      call compare_values('flux',3,nsect,sectvals1,sectvals2
-     &						,rerr2)
+              call compare_values('flux',3,nsect,sectvals1,sectvals2    &
+     &                                          ,rerr2)
 	      rerrmax = max(rerrmax,rerr2)
 	    end if
 	  end if
@@ -583,20 +583,20 @@
 	  format   = '(    f10.3)'
 	  format77 = '(a20,f10.3)'
 	else if( ftype == 1 ) then
-          sh = '    srad    tair    rhum  wspeed'
-     +		 // '     cc   rain   evap    ice'
+          sh = '    srad    tair    rhum  wspeed'                       &
+     &           // '     cc   rain   evap    ice'
 	  format   = '(    4f8.3,4f7.3)'
 	  formatb  = '(    i5,4f8.3,4f7.3)'
 	  format77 = '(a20,4f8.3,4f7.3)'
 	else if( ftype == 2 ) then
-          sh = '     temp     salt  c_speed  act_eta'
-     +		 // ' aver_eta  bstress      volume'
+          sh = '     temp     salt  c_speed  act_eta'                   &
+     &           // ' aver_eta  bstress      volume'
 	  format   = '(    6f9.3,1e12.4)'
 	  formatb  = '(    i5,6f9.3,1e12.4)'
 	  format77 = '(a20,6f8.3,1e12.4)'
 	else if( ftype == 3 ) then
-          sh = '     temp     salt  c_speed  act_eta'
-     +		 // ' aver_eta  bstress      volume'
+          sh = '     temp     salt  c_speed  act_eta'                   &
+     &           // ' aver_eta  bstress      volume'
 	  format   = '(    6f9.3,1e12.4)'
 	  formatb  = '(    i5,6f9.3,1e12.4)'
 	  format77 = '(a20,6f8.3,1e12.4)'
@@ -617,8 +617,8 @@
 
 !************************************************************
 
-        subroutine aver3dbox(nbox,nval,nval3d,lmax,lbmax
-     &				,boxvals3d,vals2d,boxvals)
+        subroutine aver3dbox(nbox,nval,nval3d,lmax,lbmax                &
+     &                          ,boxvals3d,vals2d,boxvals)
 
 	implicit none
 
@@ -656,8 +656,8 @@
 
 !************************************************************
 
-        subroutine aver3dflux(nsect,lmax,isvals
-     &				,sectvals3d,sectvals)
+        subroutine aver3dflux(nsect,lmax,isvals                         &
+     &                          ,sectvals3d,sectvals)
 
 	implicit none
 
@@ -682,9 +682,9 @@
 
 !************************************************************
 
-	subroutine combine_2d_fluxes(iu,nbox,nsect,nobs,isvals,iovals
-     &					,sectvals,obcvals
-     &					,nout,isout,sectout)
+        subroutine combine_2d_fluxes(iu,nbox,nsect,nobs,isvals,iovals   &
+     &                                  ,sectvals,obcvals               &
+     &                                  ,nout,isout,sectout)
 
 	implicit none
 

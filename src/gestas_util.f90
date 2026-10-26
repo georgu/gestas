@@ -341,14 +341,16 @@
 !************************************************************
 !************************************************************
 
-	subroutine read_input_file_names(nscal,nbound
-     &			,param_file,init_file,bound_files)
+        subroutine read_input_file_names(input_file &
+     &			,nbox,nscal,nbound     &
+     &                  ,param_file,init_file,bound_files)
 
 ! reads file input_file_names.txt and looks for input files
 
 	implicit none
 
-	integer nscal,nbound
+	character*80 input_file
+	integer nbox,nscal,nbound
 	character*80 param_file
 	character*80 init_file
 	character*80 bound_files(nbound)
@@ -361,7 +363,7 @@
 
 	integer iscand
 
-	file = 'input_files.txt'
+	file = input_file
 
 	bdebug = .true.
 	iline = 0

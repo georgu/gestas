@@ -371,9 +371,9 @@
 !************************************************************
 !************************************************************
 
-        subroutine aquabc_debug(time,time_step 
-     &          ,nbox,nstate,n_driving_functions 
-     &          ,STATE_VARIABLES,PH 
+        subroutine aquabc_debug(time,time_step                          &
+     &          ,nbox,nstate,n_driving_functions                        &
+     &          ,STATE_VARIABLES,PH                                     &
      &          ,DRIVING_FUNCTIONS,SEDIMENT_FLUXES,SURFACE_BOXES)
 
         double precision time,time_step

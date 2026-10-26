@@ -63,10 +63,10 @@
 	integer idbox
 	character*80 string
 
-	character (len=8),dimension(0:8) :: strings = (/
-     +		'init    ','meteo   ','2d      ','3d      ',
-     +		'vertical','        ','        ','geom    ','stats   '
-     +		/)
+        character (len=8),dimension(0:8) :: strings = (/                &
+     &          'init    ','meteo   ','2d      ','3d      ',            &
+     &          'vertical','        ','        ','geom    ','stats   '  &
+     &          /)
 
 	read(iu,'(a)') string
 	i = index(string,'idbox')
@@ -147,11 +147,11 @@
 !*********************************************************
 !*********************************************************
 
-	subroutine get_box_dimensions(iu,ftype
-     &				,nbox,nvar
-     &				,nsect,nobs
-     &				,lmax
-     &				,ierr)
+        subroutine get_box_dimensions(iu,ftype                          &
+     &                          ,nbox,nvar                              &
+     &                          ,nsect,nobs                             &
+     &                          ,lmax                                   &
+     &                          ,ierr)
 
 	implicit none
 
@@ -647,8 +647,8 @@
 
 !*********************************************************
 
-	subroutine read_box_records_3d(iu,nbox,nvar,lmax
-     &					,lbmax,vals,vals2d)
+        subroutine read_box_records_3d(iu,nbox,nvar,lmax                &
+     &                                  ,lbmax,vals,vals2d)
 
 	implicit none
 
@@ -776,8 +776,8 @@
 
 !*********************************************************
 
-	subroutine read_flux_records_3d(iu,nsect,lmax
-     &					,isvals,vals)
+        subroutine read_flux_records_3d(iu,nsect,lmax                   &
+     &                                  ,isvals,vals)
 
 	implicit none
 
@@ -992,11 +992,11 @@
 	end module mod_boxutil
 !---------------------------------------------------------
 
-	subroutine read_record_2d(iu,aline,dtime,nbox,nvar,ns,ns_obc
-     &			,vals
-     &			,isvals,fluxes
-     &			,isvals_obc,fluxes_obc
-     &			,ierr)
+        subroutine read_record_2d(iu,aline,dtime,nbox,nvar,ns,ns_obc    &
+     &                  ,vals                                           &
+     &                  ,isvals,fluxes                                  &
+     &                  ,isvals_obc,fluxes_obc                          &
+     &                  ,ierr)
 
 	use mod_boxutil
 

@@ -58,11 +58,11 @@
 !       -----------------------------------------------------
 
 	character*10, save :: what = 'weutro'
-	character*13, save :: descrp(nscal) = (/ 
-     &		 '   nh3 [mg/L]','   no3 [mg/L]','  opo4 [mg/L]'
-     &		,' phyto [mg/L]','  cbod [mg/L]','    do [mg/L]'
-     &		,'    on [mg/L]','    op [mg/L]','   zoo [mg/L]'
-     &						/)
+        character*13, save :: descrp(nscal) = (/                        &
+     &           '   nh3 [mg/L]','   no3 [mg/L]','  opo4 [mg/L]'        &
+     &          ,' phyto [mg/L]','  cbod [mg/L]','    do [mg/L]'        &
+     &          ,'    on [mg/L]','    op [mg/L]','   zoo [mg/L]'        &
+     &                                          /)
 
 !       -----------------------------------------------------
 
@@ -122,8 +122,9 @@
 !	get file names and initialize weutro
 !       -----------------------------------------------------
 
-	call read_input_file_names(nscal,nbound
-     &			,param_file,init_file,bound_files)
+        call read_input_file_names(weutro_input &
+     &			,nbox,nscal,nbound                         &
+     &                  ,param_file,init_file,bound_files)
 
 	call handle_param_init(param_file)
         call weutro_initial_conditions

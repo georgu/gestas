@@ -55,11 +55,11 @@
 	  call scalar_out_header(iubase+4,'water level [m]')
 
 	  write(iuaver,'(a)')  '# averages of hydro data over all boxes'
-          write(iuaver,'(4a)') '#      date_and_time'
-     &		// '   temperature'
-     &		// '      salinity'
-     &		// '   water_level'
-     &		// '        volume'
+          write(iuaver,'(4a)') '#      date_and_time'                   &
+     &          // '   temperature'                                     &
+     &          // '      salinity'                                     &
+     &          // '   water_level'                                     &
+     &          // '        volume'
 
 	  icall = 1
 	end if
@@ -77,8 +77,8 @@
 	call box_average(vnew,vaver)
 
 	format='(a,3f14.3,e14.6)'
-	write(iuaver,format) pline,sngl(taver),sngl(saver)
-     &				,sngl(zaver),sngl(vaver)
+        write(iuaver,format) pline,sngl(taver),sngl(saver)              &
+     &                          ,sngl(zaver),sngl(vaver)
 
 	end
 
@@ -109,12 +109,12 @@
 	  call scalar_out_header(iubase+5,'cloud cover [0-1]')
 
 	  write(iuaver,'(a)')  '# averages of meteo data over all boxes'
-          write(iuaver,'(4a)') '#      date_and_time'
-     &		// '       srad'
-     &		// '      atemp'
-     &		// '       rhum'
-     &		// '     wspeed'
-     &		// '     ccover'
+          write(iuaver,'(4a)') '#      date_and_time'                   &
+     &          // '       srad'                                        &
+     &          // '      atemp'                                        &
+     &          // '       rhum'                                        &
+     &          // '     wspeed'                                        &
+     &          // '     ccover'
 
 	  icall = 1
 	end if
@@ -134,8 +134,8 @@
 	call box_average(lmeteo(:,5),caver)
 
 	format='(a,5f11.3)'
-	write(iuaver,format) pline,sngl(saver),sngl(taver)
-     &			,sngl(haver),sngl(waver),sngl(caver)
+        write(iuaver,format) pline,sngl(saver),sngl(taver)              &
+     &                  ,sngl(haver),sngl(waver),sngl(caver)
 
 	end
 
@@ -163,8 +163,8 @@
 	    iu = iubase + is
             if = isect(1,is)      ! box from
             it = isect(2,is)      ! box to
-	    write(text,'(a,i5,a,i5)') 'fluxes between boxes [m**3/s]'
-     &			//' from box ',if,' to box ',it
+            write(text,'(a,i5,a,i5)') 'fluxes between boxes [m**3/s]'   &
+     &                  //' from box ',if,' to box ',it
 	    call sect_out_header(iu,text)
 	  end do
 
@@ -193,17 +193,17 @@
 
         integer i,is
         character*80 formhead
-	character*12, save :: descrp(3) = 
-     &		(/'       total'
-     &		 ,'    positive'
-     &		 ,'    negative'/)
+        character*12, save :: descrp(3) =                               &
+     &          (/'       total'                                        &
+     &           ,'    positive'                                        &
+     &           ,'    negative'/)
 
         formhead = ' '
         write(formhead,'(a,i2,a)') '(a,',nbox,'a)'
 
         write(iu,'(a,a)') '# ',trim(what)
-        write(iu,formhead) '#      date_and_time'
-     +          ,(descrp(i),i=1,3)
+        write(iu,formhead) '#      date_and_time'                       &
+     &          ,(descrp(i),i=1,3)
 
         end
 

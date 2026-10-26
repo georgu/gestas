@@ -161,7 +161,8 @@
 
 	call wrt_reset
 
-	ifrqwrt = nint( spd * dtwrt / dt )	!frequency of reset
+	dtwrt = wrt_freq			!from main (CLO)
+	ifrqwrt = nint( spd * dtwrt / dt )	!reset frequency [time steps]
 
 	iu = iumass
 	call scalar_mass_header(iu,nscal,'total mass for WRT')

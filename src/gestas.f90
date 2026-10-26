@@ -48,21 +48,14 @@
 
 	implicit none
 
-	logical, save :: bpe = .false.	  !use rain/evap for mass error
-        logical, save :: blimit = .false. !limit concentration
-        logical, save :: badvect = .true. !advect concentration
-
-	!integer, save :: imax = 50	!maximum number of time steps
-	integer, save :: imax = 0	!maximum number of time steps
-
 	!integer, parameter :: ifreq = 1    !frequency of output (every time)
 	!integer, parameter :: ifreq = 24   !frequency of output (daily)
 	!integer, parameter :: ifreq = 168  !frequency of output (weekly)
-	integer, parameter :: ifreq = 730  !frequency of output (monthly)
+	!integer, parameter :: ifreq = 730  !frequency of output (monthly)
 	!integer, parameter :: ifreq = 8766 !frequency of output (yearly)
 
 	double precision, save :: ptime0 = 0
-	double precision, save :: pextra = 3600	!if not full year available
+	double precision, save :: pextra = 0	!if not full year available
 	double precision, save :: pyear = 1	!how many years to simulate
 	character*20, save :: pline		!date for perpetual year
 
@@ -111,9 +104,33 @@
 	double precision, save, allocatable :: flux(:,:)  !section fluxes
 	double precision, save, allocatable :: oflux(:,:) !OB section fluxes
 
-	integer :: iheader = 30*max(1,ifreq)
-	character*80, save :: header = ' iterations                dtime'
-     &			// '             date and time             verr'
+!------------------------------------------------------------
+
+	logical, save :: bsilent = .false.
+	logical, save :: bquiet = .false.
+	logical, save :: bverbose = .false.
+	integer, save :: ifreq = -1		!frequency of output
+	integer, save :: imax = 0		!maximum number of time steps
+
+        character*80, save :: boxfiles = ' '
+
+	logical, save :: bconz = .false.
+	logical, save :: bwrt = .false.
+	logical, save :: bsteady = .false.
+	logical, save :: bweutro = .false.
+	logical, save :: baquabc = .false.
+	logical, save :: bbfm = .false.
+
+	character*80, save :: weutro_input
+	integer, save :: wrt_freq
+
+	logical, save :: bpe = .false.	  !use rain/evap for mass error
+        logical, save :: blimit = .false. !limit concentration
+        logical, save :: badvect = .true. !advect concentration
+
+        character*80, save :: header =                                  &
+     &             ' iterations                dtime'                   &
+     &          // '             date and time             verr'
 
 !============================================================
 	end module boxes
@@ -121,19 +138,20 @@
 
 	program gestas
 
+	use clo
 	use boxes
 
 	implicit none
 
 	logical bout
 	integer ierr
+	integer iheader
 	double precision verr
 	double precision time_start,time_end
 
-	bout = ifreq == 0
-
 	call cpu_time(time_start)
 
+	call gestas_init	!handle command line
 	call read_stats
 	call initialize_time
 	call get_open_boundary_conditions
@@ -142,12 +160,17 @@
 	call read_zinit
 	call scalar_init
 
-	write(6,*) 'running with time step ',dt
+	bout = ifreq == 0
+	iheader = 30*max(1,ifreq)
 
-	write(6,*) '==========================='
-	write(6,*) 'start of time loop'
-	write(6,*) '==========================='
-	write(6,*) trim(header)
+	if( .not. bquiet ) then
+	  write(6,*) 'running with time step ',dt
+
+	  write(6,*) '==========================='
+	  write(6,*) 'start of time loop'
+	  write(6,*) '==========================='
+	  write(6,*) trim(header)
+	end if
 
 	do
 
@@ -174,19 +197,23 @@
 
 	end do
 
-	write(6,*) '==========================='
-	write(6,*) 'end of time loop'
-	write(6,*) '==========================='
+	if( .not. bquiet ) then
+	  write(6,*) '==========================='
+	  write(6,*) 'end of time loop'
+	  write(6,*) '==========================='
 
-	write(6,*) irec,' time records read'
-	write(6,*) 'start time of simulation: ',stime_start
-	write(6,*) 'end time of simulation:   ',stime_end
+	  write(6,*) irec,' time records read'
+	  write(6,*) 'start time of simulation: ',stime_start
+	  write(6,*) 'end time of simulation:   ',stime_end
+	end if
 
 	call hydro_finalize
 	call scalar_finalize
 
-	call cpu_time(time_end)
-	write(6,*) time_end-time_start,' seconds cpu time used'
+	if( .not. bquiet ) then
+	  call cpu_time(time_end)
+	  write(6,*) time_end-time_start,' seconds cpu time used'
+	end if
 
 	end
 
@@ -404,6 +431,130 @@
 	write(6,*) date0,time0,atime0
 
 	call lintp_set_reference(atime0)
+
+	end
+
+!************************************************************
+
+	subroutine gestas_copyright(routine)
+
+	implicit none
+
+	character*(*) routine
+
+	character*50 copyright,acronym
+
+	acronym = ' '
+	copyright = 'Copyright (C) Georg Umgiesser 2024-2026'
+
+        write(6,*) '---------------------------------------'
+        write(6,*) 'GESTAS' ! // ' - ' // trim(acronym)
+        write(6,*) copyright
+        write(6,*) routine
+        write(6,*) '---------------------------------------'
+
+	end
+
+!************************************************************
+!************************************************************
+!************************************************************
+
+	subroutine gestas_init
+
+        use clo
+	use boxes
+
+        implicit none
+
+	logical bnoadvect
+        integer nfiles
+
+        call clo_init('gestas','[box-files]','2.0')
+
+        call clo_add_info('box model for shyfem')
+
+        call clo_add_sep('output options')
+
+        call clo_add_option('verbose',.false.,'be verbose')
+        call clo_add_option('quiet',.false.,'be quiet')
+        call clo_add_option('silent',.false.,'be silent')
+
+        call clo_add_option('freq ifreq',ifreq &
+     &				,'frequency of output [time steps]')
+
+        call clo_add_sep('modules')
+
+        call clo_add_option('weutro input-files',' ','run weutro module')
+        call clo_add_option('aquabc',.false.,'run aquabc module')
+        call clo_add_option('bfm',.false.,'run bfm module')
+        call clo_add_option('wrt freq',-1,'run wrt module ' &
+     &				// 'with reset frequency freq')
+        call clo_add_option('conz',.false.,'run conz module')
+        call clo_add_option('steady',.false.,'run steady state module')
+
+        call clo_add_sep('modifiers')
+
+        call clo_add_option('noadvect',.false.,'do not advect scalars')
+        call clo_add_option('limit',.false.,'limit scalars between min/max')
+        call clo_add_option('imax imax',0,'do only imax time steps')
+        call clo_add_option('years iyear',0,'run iyear perpetual years')
+
+        call clo_hide_next_options
+        call clo_add_sep('extra options')
+        call clo_add_option('pextra pextra',0,'use pextra for perpetual years')
+        call clo_show_next_options
+
+        call clo_add_sep('additional information')
+        call clo_add_com('  if no box-files is given,' &
+     &			// ' standard boxes_*.txt are used')
+ 
+        call clo_parse_options
+
+        call clo_get_option('verbose',bverbose)
+        call clo_get_option('quiet',bquiet)
+        call clo_get_option('silent',bsilent)
+
+        call clo_get_option('freq',ifreq)
+	if( ifreq == -1 ) then
+	  if( bsilent ) then
+	    ifreq = 0
+	  else if( bverbose ) then
+	    ifreq = 1
+	  else
+	    ifreq = 730
+	  end if
+	end if
+
+        if( bsilent ) bquiet = .true.
+        if( bquiet ) bverbose = .false.
+
+        call clo_get_option('weutro',weutro_input)
+	if( weutro_input /= ' ' ) bweutro = .true.
+        call clo_get_option('aquabc',baquabc)
+        call clo_get_option('bfm',bbfm)
+        call clo_get_option('wrt',wrt_freq)
+	if( wrt_freq >= 0 ) bwrt = .true.
+        call clo_get_option('conz',bconz)
+        call clo_get_option('steady',bsteady)
+
+        call clo_get_option('noadvect',bnoadvect)
+	badvect = .not. bnoadvect
+        call clo_get_option('limit',blimit)
+        call clo_get_option('imax',imax)
+        call clo_get_option('years',pyear)
+	if( pyear < 1 ) pyear = 1
+        call clo_get_option('pextra',pextra)
+
+	nfiles = clo_number_of_files()
+	if( nfiles > 0 ) then
+          call clo_get_file(1,boxfiles)
+	  write(6,*) 'box-files: ',trim(boxfiles)
+	  stop 'error stop gestas_init: box-files not yet ready'
+	end if
+
+        if( .not. bsilent ) then
+          call gestas_copyright('gestas - box model for shyfem')
+        end if
 
 	end
 

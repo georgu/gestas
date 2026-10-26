@@ -12,7 +12,7 @@ MAKEDEPEND = $(FEMBIN)/mkdp.pl
 MODDIR = .
 
 SUBDIRS = bfm test data weutro
-SUBDIRS = bfm weutro
+SUBDIRS = bfm weutro aquabc
 
 DATE=`date +%Y-%m-%d`
 
@@ -25,8 +25,10 @@ FFLAGS = -g -fimplicit-none
 FFLAGS = -g -fimplicit-none $(FGNU_NOOPT)
 LFLAGS =
 
-WHAT = weutro
+WHAT = weutro aquabc bfm
 
+AQUABC = aquabc
+AQUABCOBJ = aquabc/aquabc_fake.o
 AQUABCDIR = /home/georg/work/aquabc/ESTAS_AQUABC/modelCore/build
 AQUABCLIB = -L$(AQUABCDIR) -laquabc
 
@@ -35,9 +37,13 @@ WEUTRODIR = $(WEUTRO)
 WEUTRONAME = lib$(WEUTRO).a
 WEUTROLIB = -L$(WEUTRODIR) -l$(WEUTRO)
 
-BFMDIR = /home/georg/work/bfm/bfm
-BFMOBJSDIR = $(BFMDIR)/build/tmp/BFMLIB
-BFMLIB = -L$(BFMDIR)/lib -lbfm
+BFM = bfm
+BFMDIR = $(BFM)
+BFMOBJ = bfm/bfm_fake.o
+
+BFMLIBDIR = /home/georg/work/bfm/bfm
+BFMOBJSDIR = $(BFMLIBDIR)/build/tmp/BFMLIB
+BFMLIB = -L$(BFMLIBDIR)/lib -lbfm
 #MODULES= -I$(BFMDIR)/include
 #include $(BFMOBJSDIR)/make_list.txt
 
@@ -52,6 +58,7 @@ OBJS2 = gestas.o gestas_util.o \
 		gestas_scalar.o gestas_wrt.o gestas_conz.o \
 		gestas_steady.o \
 		gestas_weutro.o \
+		gestas_aquabc.o \
 		gestas_perpetual.o \
 		gestas_read.o \
 		gestas_out.o \
@@ -59,20 +66,25 @@ OBJS2 = gestas.o gestas_util.o \
 		#gestas_aquabc.o \
 		#gestas_bfm.o \
 
-OBJS = $(OBJS1) $(OBJS2)
+OBJS = $(OBJS1) $(OBJS2) $(AQUABCOBJ) $(BFMOBJ)
 EXES = boxinf boxindex boxscan gestas fileinf simplediff
 EXES_BFM = bfm_util test_bfm boxcompare
 
 #-----------------------------------------------------------
 
-default: weutro $(EXES)
+default: weutro aquabc bfm $(EXES)
 #default: $(LIB) $(EXES)
 
 all: default
 
-$(AQUABCLIB):
+$(AQUABC):
+	cd $(AQUABC); make
+
 weutro:
 	cd $(WEUTRODIR); make
+
+bfm:
+	cd $(BFMDIR); make
 
 boxinf: clo.o boxutil.o boxinf.o
 	gfortran -o $@ clo.o boxutil.o $@.o
@@ -80,23 +92,23 @@ boxinf: clo.o boxutil.o boxinf.o
 fileinf: clo.o fileinf.o
 	gfortran -o $@ clo.o $@.o
 
-boxindex: boxindex.f
-	gfortran -o $@ $@.f
+boxindex: boxindex.o
+	gfortran -o $@ $@.f90
 
-boxscan: boxscan.f
-	gfortran -o $@ $@.f
+boxscan: boxscan.o
+	gfortran -o $@ $@.f90
 
 gestas: $(WHAT) $(OBJS)
 	$(F77) $(LFLAGS) $(OBJS) $(LIB) -o $@
 
 test_bfm: test_bfm.o
-	gfortran -o $@ $(MODULES) $(BFMOBJS) $(NETCDFLIB) $@.f
+	gfortran -o $@ $(MODULES) $(BFMOBJS) $(NETCDFLIB) $@.f90
 
 bfm_util: bfm_util.o
-	gfortran -o $@ $(MODULES) $(BFMOBJS) $(NETCDFLIB) $@.f
+	gfortran -o $@ $(MODULES) $(BFMOBJS) $(NETCDFLIB) $@.f90
 
 simplediff: simplediff.o
-	gfortran -o $@ $@.f
+	gfortran -o $@ $@.f90
 
 #-----------------------------------------------------------
 
@@ -128,7 +140,7 @@ zip: cleanall
 
 #-----------------------------------------------------------
 
-.PHONY: clean cleanall weutro
+.PHONY: clean cleanall weutro aquabc bfm
 
 .f.o:
 	$(F77) -c $(FFLAGS) $(MODULES) $<
