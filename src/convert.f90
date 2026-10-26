@@ -28,11 +28,12 @@
 !
 ! contents :
 !
-! function istof(line,f,ioff)			converts string to number
-! function istod(line,d,ioff)			converts string to number
+! function istof(line,f,ioff)			converts next string to number
+! function istod(line,d,ioff)			converts next string to number
 ! function iscand(line,d,max)			converts string to numbers
 ! function iscanf(line,f,max)			converts string to numbers
 ! function iscans(line,s,max)			returns tokens separated by ws
+! function iscanp(line,s,sep,max)		returns tokens separated by sep
 ! function istot(line,string,ioff)		returns next token on line
 ! function istos(line,string,ioff)		returns next string on line
 ! function iston(line,string,ioff)		returns next name on line
@@ -42,6 +43,8 @@
 ! function is_upper(c)				checks if c is upper case
 ! function is_letter(c)				checks if c is letter
 ! function is_alpha(c)				checks if c is alphanumeric
+! function is_whitespace(c)			checks if c is white space
+! function is_integer(string)			checks if string is integer
 ! subroutine to_lower(string)			converts string to lower case
 ! subroutine to_upper(string)			converts string to upper case
 !
@@ -87,6 +90,8 @@
 ! 13.03.2019	ggu	changed VERS_7_5_61
 ! 21.05.2019	ggu	changed VERS_7_5_62
 ! 11.12.2020	ggu	ichafs() and ichanm() moved here from subsss.f
+! 21.09.2024	ggu	new routines is_whitespace() and is_integer()
+! 02.10.2025	ggu	new routines iscanp()
 !
 !****************************************************************
 
@@ -100,7 +105,7 @@
 	character*1,  parameter :: plus = '+'
 	character*1,  parameter :: minus = '-'
 	character*1,  parameter :: dot = '.'
-	character*4,  parameter :: expont = 'eEdD'
+	character*4,  parameter :: exponent = 'eEdD'
 	character*10, parameter :: number = '1234567890'
 
 !================================================================
@@ -221,7 +226,7 @@
 		else
 			berr=.true.
 		end if
-	else if( icindx(expont,c) .gt. 0 ) then
+	else if( icindx(exponent,c) .gt. 0 ) then
 		if( .not.bexp .and. bnumb ) then
 			bexp=.true.
 		else
@@ -394,6 +399,49 @@
 	end do
 
 	iscans = n
+
+	end
+
+!****************************************************************
+
+	function iscanp(line,s,sep,max)
+
+! returns tokens separated by sep (maximum max tokens, max==0 -> just count)
+
+	use scan_string
+
+	implicit none
+
+	integer iscanp		!total number of tokens found (returned)
+	character*(*) line	!line to scan
+	character*(*) s(max)	!returned tokens
+	character*(*) sep	!separator to be used
+	integer max		!max number of tokens returned (0: just count)
+
+	integer n,i
+	character*80 string
+
+	n = 0
+	string = line
+
+	do
+	  i = index(string,trim(sep))
+	  !write(6,*) trim(string),' ',trim(sep),i,n,max
+	  if( i <= 0 ) exit
+	  n = n + 1
+	  if( max > 0 ) then
+	    s(n) = string(1:i-1)
+	    if( max == n ) exit
+	  end if
+	  string(1:) = string(i+1:)
+	end do
+
+	if( string /= ' ' ) then
+	  n = n + 1
+	  if( max > 0 .and. n <= max ) s(n) = string
+	end if
+
+	iscanp = n
 
 	end
 
@@ -668,6 +716,71 @@
 
 !****************************************************************
 
+	function is_whitespace(c)
+
+! checks if c is white space char
+
+	use scan_string
+
+	implicit none
+
+	logical is_whitespace
+	character*1 c
+
+	is_whitespace = ( c == blank .or. c == tab )
+
+	end
+
+!****************************************************************
+
+	function is_integer(string)
+
+! checks if string is an integer
+
+	use scan_string
+
+	implicit none
+
+	logical is_integer
+	character*(*) string
+
+	integer is,i,ic
+	logical berror
+	character*1 c
+
+	logical is_digit,is_whitespace
+	integer ichafs
+
+	ic = 0
+	berror = .false.
+
+	is = ichafs(string)
+	if( string(is:is) == minus .or. string(is:is) == plus ) is = is + 1
+
+	do i=is,len(string)
+	  c = string(i:i)
+	  if( is_digit(c) ) then
+	    ic = ic + 1
+	  else if( is_whitespace(c) ) then
+	    exit
+	  else
+	    berror = .true.
+	    exit
+	  end if
+	end do
+
+	if( berror ) then
+	  is_integer = .false.
+	else if( ic == 0 ) then
+	  is_integer = .false.
+	else
+	  is_integer = .true.
+	end if
+
+	end
+
+!****************************************************************
+
 	subroutine to_lower(string)
 
 ! converts string to lower case
@@ -816,11 +929,13 @@
 
 ! computes ciphers of number
 !
-! idigit	ciphers of number z with minus sign and
+! idigit	total number of digits of value with minus sign and
 !		...decimal point if necessary (return value)
 ! value		number for which ciphers have to be determined
 ! ndec		positions after the decimal point
 !		(-1 : no decimal point)
+
+	use iso_fortran_env, only: i4=>int32, i8=>int64
 
 	implicit none
 
@@ -828,15 +943,19 @@
 	real value
 	integer ndec
 
-	integer iz,istel
+	integer istel
+	!integer iz
+	integer(kind=i8) iz
+	!integer(kind=int64) iz
+	integer(kind=i8), parameter :: big = huge(0_8)
 
-	istel=0
-
-	if( abs(value) > 1.e8 ) then
-	  write(6,*) 'cannot compute digits... too big: ',value
+	!write(6,*) 'big = ',big
+	if( abs(value) > big ) then
+	  write(6,*) 'cannot compute digits... value too big: ',value
 	  stop 'error stop idigit: internal error (1)'
 	end if
 
+	istel=0
 	iz=abs(value)+0.01
 	if(iz.eq.0) istel=1
 	if(value.lt.0.) istel=istel+1
@@ -1229,6 +1348,60 @@
 
 !****************************************************************
 
+	subroutine test_iscanp
+
+	implicit none
+
+	integer, parameter :: ndim = 5
+	character*80 :: line
+	character*80 :: sep
+
+	sep = '-'
+
+	line = ''
+	call check_iscanp(line,sep,ndim,0)
+	line = '2025'
+	call check_iscanp(line,sep,ndim,1)
+	line = '2025-'
+	call check_iscanp(line,sep,ndim,1)
+	line = '2025-03'
+	call check_iscanp(line,sep,ndim,2)
+	line = '2025-03-'
+	call check_iscanp(line,sep,ndim,2)
+	line = '2025-03-15'
+	call check_iscanp(line,sep,ndim,3)
+
+	end
+
+!****************************************************************
+
+	subroutine check_iscanp(line,sep,max,iexp)
+
+	implicit none
+
+	character*(*) line
+	character*(*) sep
+	integer max,iexp
+
+	integer i,n
+	character*80 :: strings(max)
+	integer iscanp
+
+	n = iscanp(line,strings,sep,0)
+	write(6,*) 'string: ',trim(line),'  substrings found:',n
+	if( n /= iexp ) then
+	  write(6,*) 'n = ',n,'  expected = ',iexp
+	  stop 'error stop check_iscanp: n /= iexp'
+	end if
+	n = iscanp(line,strings,sep,max)
+	do i=1,n
+	  write(6,*) i,trim(strings(i))
+	end do
+
+	end
+
+!****************************************************************
+
 	subroutine check_tabs
 
 	implicit none
@@ -1255,6 +1428,7 @@
 	subroutine test_scan
 	call scants
 	call test_iscans
+	call test_iscanp
 	call check_tabs
 	end
 

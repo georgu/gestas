@@ -46,7 +46,8 @@ NETCDFLIB = -L/usr/lib/x86_64-linux-gnu  -lnetcdf -lnetcdff
 LIB = $(AQUABCLIB)
 LIB = $(WEUTROLIB)
 
-OBJS1 = subdate.o subscn.o sublintp.o
+OBJS1 = subdate.o subscn.o sublintp.o subclo.o
+OBJS1 = date.o convert.o lintp.o clo.o
 OBJS2 = gestas.o gestas_util.o \
 		gestas_scalar.o gestas_wrt.o gestas_conz.o \
 		gestas_steady.o \
@@ -73,11 +74,11 @@ $(AQUABCLIB):
 weutro:
 	cd $(WEUTRODIR); make
 
-boxinf: subclo.o boxutil.o boxinf.o
-	gfortran -o $@ subclo.o boxutil.o $@.o
+boxinf: clo.o boxutil.o boxinf.o
+	gfortran -o $@ clo.o boxutil.o $@.o
 
-fileinf: subclo.o fileinf.o
-	gfortran -o $@ subclo.o $@.o
+fileinf: clo.o fileinf.o
+	gfortran -o $@ clo.o $@.o
 
 boxindex: boxindex.f
 	gfortran -o $@ $@.f
@@ -132,6 +133,12 @@ zip: cleanall
 .f.o:
 	$(F77) -c $(FFLAGS) $(MODULES) $<
 
+.f90.o:
+	$(F77) -c $(FFLAGS) $(MODULES) $<
+
+%.o: %.f90
+	$(F77) $(FFLAGS) $(MODULES) -c $<
+
 #---------------------------------------------------------
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
@@ -143,14 +150,11 @@ zip: cleanall
 ./boxes_conz.mod: gestas_conz.o
 ./boxes_scalar.mod: gestas_scalar.o
 ./boxes_steady.mod: gestas_steady.o
+./boxes_weutro.mod: gestas_weutro.o
 ./boxes_wrt.mod: gestas_wrt.o
-./clo.mod: subclo.o
 ./mod_boxinf.mod: boxinf.o
 ./mod_boxutil.mod: boxutil.o
-./mod_date.mod: subdate.o
 ./mod_fileinf.mod: fileinf.o
-./mod_lintp.mod: sublintp.o
-./scan_string.mod: subscn.o
 bfm_util.o: ./api_bfm.mod ./constants.mod ./init_var_bfm_local.mod \
 		./mem.mod ./mem_par.mod ./time.mod 
 boxinf.o: ./clo.mod ./mod_boxutil.mod
@@ -159,9 +163,12 @@ gestas.o: ./mod_date.mod ./mod_lintp.mod
 gestas_aquabc.o: ./boxes.mod ./mod_lintp.mod
 gestas_bfm.o: ./boxes.mod
 gestas_conz.o: ./boxes.mod
-gestas_scalar.o: ./boxes.mod
+gestas_out.o: ./boxes.mod
+gestas_perpetual.o: ./boxes.mod ./mod_date.mod
+gestas_read.o: ./boxes.mod ./mod_date.mod
+gestas_scalar.o: ./boxes.mod ./mod_date.mod
 gestas_steady.o: ./boxes.mod
+gestas_weutro.o: ./boxes.mod ./mod_date.mod ./mod_lintp.mod
 gestas_wrt.o: ./boxes.mod
-sublintp.o: ./mod_date.mod
 test_bfm.o: ./standalone.mod
 

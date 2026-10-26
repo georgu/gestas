@@ -109,23 +109,23 @@
 	type(info), save :: pinfo(ndim)
 
         INTERFACE lintp_init
-        MODULE PROCEDURE         lintp_init_iu_nvar
-     +                          ,lintp_init_nvar
-     +                          ,lintp_init_id
+        MODULE PROCEDURE         lintp_init_iu_nvar                     &
+     &                          ,lintp_init_nvar                        &
+     &                          ,lintp_init_id
         END INTERFACE
 
         INTERFACE lintp_interpolate
-        MODULE PROCEDURE         lintp_interpolate_d
-     +                          ,lintp_interpolate_s
-     +                          ,lintp_interpolate_d1
-     +                          ,lintp_interpolate_s1
+        MODULE PROCEDURE         lintp_interpolate_d                    &
+     &                          ,lintp_interpolate_s                    &
+     &                          ,lintp_interpolate_d1                   &
+     &                          ,lintp_interpolate_s1
         END INTERFACE
 
         INTERFACE lintp_set_reference
-        MODULE PROCEDURE         lintp_set_reference_s
-     +                          ,lintp_set_reference_d
-     +                          ,lintp_set_reference_sg
-     +                          ,lintp_set_reference_dg
+        MODULE PROCEDURE         lintp_set_reference_s                  &
+     &                          ,lintp_set_reference_d                  &
+     &                          ,lintp_set_reference_sg                 &
+     &                          ,lintp_set_reference_dg
         END INTERFACE
 
 	public lintp_init,lintp_interpolate,lintp_set_reference,lintp_info

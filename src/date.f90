@@ -108,49 +108,49 @@
 	integer, parameter          :: tdate = 10000
 
         INTERFACE date_to_atime
-        MODULE PROCEDURE         date_to_atime_ys
-     +                          ,date_to_atime_dt
-     +                          ,date_to_atime_d
+        MODULE PROCEDURE         date_to_atime_ys                       &
+     &                          ,date_to_atime_dt                       &
+     &                          ,date_to_atime_d
         END INTERFACE
 
         INTERFACE date_from_atime
-        MODULE PROCEDURE         date_from_atime_ys
-     +                          ,date_from_atime_dtms
-     +                          ,date_from_atime_dt
-     +                          ,date_from_atime_d
+        MODULE PROCEDURE         date_from_atime_ys                     &
+     &                          ,date_from_atime_dtms                   &
+     &                          ,date_from_atime_dt                     &
+     &                          ,date_from_atime_d
         END INTERFACE
 
         INTERFACE date_format
-        MODULE PROCEDURE         date_format_ys
-     +                          ,date_format_dt
-     +                          ,date_format_d
-     +                          ,date_format_a
+        MODULE PROCEDURE         date_format_ys                         &
+     &                          ,date_format_dt                         &
+     &                          ,date_format_d                          &
+     &                          ,date_format_a
         END INTERFACE
 
         INTERFACE date_unformat
-        MODULE PROCEDURE         date_unformat_ys
-     +                          ,date_unformat_dt
-     +                          ,date_unformat_d
-     +                          ,date_unformat_a
+        MODULE PROCEDURE         date_unformat_ys                       &
+     &                          ,date_unformat_dt                       &
+     &                          ,date_unformat_d                        &
+     &                          ,date_unformat_a
         END INTERFACE
 
         INTERFACE date_set_reference
-        MODULE PROCEDURE         date_set_reference_ys
-     +                          ,date_set_reference_dt
-     +                          ,date_set_reference_d
-     +                          ,date_set_reference_a
+        MODULE PROCEDURE         date_set_reference_ys                  &
+     &                          ,date_set_reference_dt                  &
+     &                          ,date_set_reference_d                   &
+     &                          ,date_set_reference_a
         END INTERFACE
 
-	public :: 		 date_to_atime
-     +				,date_from_atime
-     +				,date_format
-     +				,date_unformat
-     +				,date_set_reference
-     +				,date_to_jd
-     +				,date_from_jd
-     +				,date_from_year
-     +				,date_ignore_error
-     +				,date_has_error
+        public ::                date_to_atime                          &
+     &                          ,date_from_atime                        &
+     &                          ,date_format                            &
+     &                          ,date_unformat                          &
+     &                          ,date_set_reference                     &
+     &                          ,date_to_jd                             &
+     &                          ,date_from_jd                           &
+     &                          ,date_from_year                         &
+     &                          ,date_ignore_error                      &
+     &                          ,date_has_error
 
 !==============================================================
 	contains
@@ -487,7 +487,7 @@
 
         subroutine ymd2jd(year,month,day,jd)
 
-c converts date to julian days of year
+! converts date to julian days of year
 
         implicit none
 
@@ -560,15 +560,15 @@ c converts date to julian days of year
 
         function jdmonth(year,month)
 
-c returns total days from January to end of month
+! returns total days from January to end of month
 
         implicit none
 
         integer jdmonth
         integer year,month
 
-        integer, save :: jmm(0:12) = 
-     +		(/0,31,59,90,120,151,181,212,243,273,304,334,365/)
+        integer, save :: jmm(0:12) =                                    &
+     &          (/0,31,59,90,120,151,181,212,243,273,304,334,365/)
 
         jdmonth=jmm(month)
 
@@ -580,15 +580,15 @@ c returns total days from January to end of month
 
         function idmonth(year,month)
 
-c returns total days from January to end of month
+! returns total days from January to end of month
 
         implicit none
 
         integer idmonth
         integer year,month
 
-        integer, save :: imm(0:12) = 
-     +		(/0,31,28,31,30,31,30,31,31,30,31,30,31/)
+        integer, save :: imm(0:12) =                                    &
+     &          (/0,31,28,31,30,31,30,31,31,30,31,30,31/)
 
         idmonth=imm(month)
 
@@ -608,8 +608,8 @@ c returns total days from January to end of month
 	bises = .false.
 	if( year <= 0 ) return
 
-        if(  ( mod(year,4) .eq. 0 .and. mod(year,100) .ne. 0 )
-     +                  .or. mod(year,400) .eq. 0 ) then
+        if(  ( mod(year,4) .eq. 0 .and. mod(year,100) .ne. 0 )          &
+     &                  .or. mod(year,400) .eq. 0 ) then
                 bises = .true.
         end if
 
@@ -732,7 +732,7 @@ c returns total days from January to end of month
 
         subroutine date_unformat_ys(aline,ys,ierr)
 
-c unformats date and time -> from string to date
+! unformats date and time -> from string to date
 
         implicit none
 
@@ -813,7 +813,7 @@ c unformats date and time -> from string to date
 
         subroutine date_unformat_dt(aline,date,time,ierr)
 
-c unformats date and time -> from string to date
+! unformats date and time -> from string to date
 
         implicit none
 
@@ -833,7 +833,7 @@ c unformats date and time -> from string to date
 
         subroutine date_unformat_d(aline,date,ierr)
 
-c unformats date and time -> from string to date
+! unformats date and time -> from string to date
 
         implicit none
 
@@ -851,7 +851,7 @@ c unformats date and time -> from string to date
 
         subroutine date_unformat_a(aline,atime,ierr)
 
-c unformats date and time -> from string to date
+! unformats date and time -> from string to date
 
         implicit none
 
