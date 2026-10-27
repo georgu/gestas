@@ -1,4 +1,12 @@
 
+#------------------------------------------------------------------------
+#
+#    Copyright (C) 2024-2026  Georg Umgiesser
+#
+#    This file is part of GESTAS.
+#
+#------------------------------------------------------------------------
+
 BFMDIR = /home/georg/work/shyfem_repo/bfm-for-shyfem-private
 INCL_BFM     = -I$(BFMDIR)/include
 INCL_BFM     = 

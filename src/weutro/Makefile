@@ -1,4 +1,12 @@
 
+#------------------------------------------------------------------------
+#
+#    Copyright (C) 2024-2026  Georg Umgiesser
+#
+#    This file is part of GESTAS.
+#
+#------------------------------------------------------------------------
+
 DIR = weutro
 
 LIBNAME = $(DIR)
@@ -6,7 +14,14 @@ LIBDIR  = .
 
 LIB = $(LIBDIR)/lib$(LIBNAME).a
 
-FFLAGS = -cpp 
+FGNU_BOUNDS = -fcheck=all
+TRAP_LIST = zero,invalid,overflow
+FGNU_NOOPT = -g -fbacktrace -ffpe-trap=$(TRAP_LIST) $(FGNU_BOUNDS)
+
+FFLAGS = -g -fimplicit-none $(FGNU_NOOPT)
+LFLAGS =
+
+#FFLAGS = -cpp 
 
 MOD  = \
 

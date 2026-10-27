@@ -66,6 +66,7 @@
 ! 25.09.2026	ggu	new routine wdiag(), new vars idnode and idlayer
 ! 29.09.2026	ggu	module introduced (not yet used)
 ! 09.10.2026	ggu	wdiag finished
+! 27.10.2026	ggu	use bw to decide what to write
 !
 ! notes :
 !
@@ -170,7 +171,7 @@
 !********************************************************************
 !********************************************************************
 
-	subroutine handle_param_init(param_file)
+	subroutine handle_weutro_param_init(param_file,bw)
 
 ! reads in parameter file
 !
@@ -179,26 +180,23 @@
 	implicit none
 
 	character*(*) param_file
+	logical bw
 
 	character*80, save :: wparam_out = 'weutro_out.txt'
 
 	logical bexist
-	logical bwrite
 	integer iu
 
-	bwrite = .false.
-	bwrite = .true.
-
-	if( bwrite ) write(6,*) 'initializing parameters for weutro'
+	if( bw ) write(6,*) 'initializing parameters for weutro'
 
 	call param_init		!read hard coded paramer list
 
 	if( param_file == ' ' ) then
-	  if( bwrite ) write(6,*) 'initializing weutro with standard parameters'
+	  if( bw ) write(6,*) 'initializing weutro with standard parameters'
 	else
 	  inquire(file=param_file,exist=bexist)
 	  if( bexist ) then
-	    if( bwrite ) then
+	    if( bw ) then
 	      write(6,*) 'reading weutro parameter file: ',trim(param_file)
 	    end if
 	    call read_weutro_param(param_file)
@@ -208,7 +206,7 @@
 	  end if
 	end if
 
-	if( bwrite ) write(6,*) 'writing weutro parameters: ',trim(wparam_out)
+	if( bw ) write(6,*) 'writing weutro parameters: ',trim(wparam_out)
 
 	iu = 1
 	open(iu,file=wparam_out,status='unknown',form='formatted')

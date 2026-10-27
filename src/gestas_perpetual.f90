@@ -29,6 +29,13 @@
 !
 !------------------------------------------------------------
 
+! revision log :
+!
+! 13.10.2026    ggu     perpetual year implemented
+! 27.10.2026    ggu     honor bsilent and bquiet
+
+! notes :
+!
 !	module boxes
 !	double precision, save :: dtime
 !	double precision, save :: atime0 = 0
@@ -62,14 +69,18 @@
 	iyear = iyear + 1
 	if( iyear >= pyear ) then
 	  !write(6,*) 'iyear = ',iyear,pyear
-	  write(6,*) 'finished running perpetual years ',iyear
+	  if( bverbose ) then
+	    write(6,*) 'finished running perpetual years ',iyear
+	  end if
 	  return
 	end if
 	newyear = iyear + 1
 
 	dstart = dtime_final + dt + pextra - yearsec
-	!write(6,*) 'looking for time ',dstart,newyear
-	write(6,*) 'simulating perpetual year ',newyear,dstart
+	if( bverbose ) then
+	  write(6,*) 'looking for time ',dstart,newyear
+	  write(6,*) 'simulating perpetual year ',newyear,dstart
+	end if
 
 	iu = 2
 	itype = 2

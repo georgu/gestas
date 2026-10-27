@@ -29,6 +29,7 @@
 !
 ! 23.03.2021    ggu     written from scratch
 ! 01.10.2026    ggu     slightly reformatted
+! 27.10.2026    ggu     bug fix in lintp_interpolate_d() -> ierr was not set
 !
 !**************************************************************
 
@@ -225,6 +226,7 @@
 
 	return
    98	continue
+	write(6,*) 'error after parse_values'
 	write(6,*) 'file: ',trim(file)
 	write(6,*) 'line: ',trim(string)
 	stop 'error stop lintp_init: read error'
@@ -361,6 +363,7 @@
 	  return
 	end if
 
+	ierr = 0
 	do
 	  if( atime <= pinfo(id)%atime2 ) exit
 	  pinfo(id)%atime1 = pinfo(id)%atime2

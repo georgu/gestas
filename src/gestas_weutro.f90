@@ -41,6 +41,11 @@
 !
 !------------------------------------------------------------
 
+! revision log :
+!
+! 10.10.2026    ggu     written from scratch
+! 27.10.2026    ggu     use bw to decide what to write
+
 !============================================================
         module boxes_weutro
 !============================================================
@@ -94,12 +99,13 @@
 
 	implicit none
 
+	logical bw
 	integer iu,is
-
 	character*80 text
 	character*4 svar
 
-        if( .not. bquiet ) write(6,*) 'initializing weutro: ',nscal
+	bw = .not. bquiet
+        if( bw ) write(6,*) 'initializing weutro: ',nscal
 
 !       -----------------------------------------------------
 !	allocate and initialize arrays
@@ -123,10 +129,11 @@
 !       -----------------------------------------------------
 
         call read_input_file_names(weutro_input &
+     &			,bw                         &
      &			,nbox,nscal,nbound                         &
      &                  ,param_file,init_file,bound_files)
 
-	call handle_param_init(param_file)
+	call handle_weutro_param_init(param_file,bw)
         call weutro_initial_conditions
         call weutro_boundary_conditions
 

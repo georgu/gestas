@@ -29,6 +29,11 @@
 !
 !------------------------------------------------------------
 
+! revision log :
+!
+! 01.01.2024    ggu     written from scratch
+! 27.10.2026    ggu     pass bw to read_input_file_names()
+
 !************************************************************
 
 	subroutine read_init_box(file,nbox,nscal,val)
@@ -342,6 +347,7 @@
 !************************************************************
 
         subroutine read_input_file_names(input_file &
+     &			,bw &
      &			,nbox,nscal,nbound     &
      &                  ,param_file,init_file,bound_files)
 
@@ -350,6 +356,7 @@
 	implicit none
 
 	character*80 input_file
+	logical bw
 	integer nbox,nscal,nbound
 	character*80 param_file
 	character*80 init_file
@@ -365,7 +372,7 @@
 
 	file = input_file
 
-	bdebug = .true.
+	bdebug = bw
 	iline = 0
 	param_file = ' '
 	init_file = ' '
@@ -403,9 +410,10 @@
 
 	if( .not. bdebug ) return
 
-	write(6,*) 'param: ',trim(param_file)
-	write(6,*) 'init: ',trim(init_file)
-	write(6,*) 'bound: '
+	write(6,*) 'information from weutro input file:'
+	write(6,*) '  param: ',trim(param_file)
+	write(6,*) '  init: ',trim(init_file)
+	write(6,*) '  bound: '
 	do i=1,nbound
 	  write(6,*) i,trim(bound_files(i))
 	end do

@@ -34,11 +34,13 @@
 ! todo :
 !
 ! consider rain and evaporation for volume error
+! implement 3D
 !
 ! revision log :
 !
 ! 01.01.2024    ggu     written from scratch
 ! 13.10.2026    ggu     some new functionalities
+! 27.10.2026    ggu     code cleaned
 !
 !------------------------------------------------------------
 
@@ -56,7 +58,7 @@
 
 	double precision, save :: ptime0 = 0
 	double precision, save :: pextra = 0	!if not full year available
-	double precision, save :: pyear = 1	!how many years to simulate
+	integer, save :: pyear = 1	!how many years to simulate
 	character*20, save :: pline		!date for perpetual year
 
 !------------------------------------------------------------
@@ -128,10 +130,6 @@
         logical, save :: blimit = .false. !limit concentration
         logical, save :: badvect = .true. !advect concentration
 
-        character*80, save :: header =                                  &
-     &             ' iterations                dtime'                   &
-     &          // '             date and time             verr'
-
 !============================================================
 	end module boxes
 !============================================================
@@ -146,6 +144,7 @@
 	logical bout
 	integer ierr
 	integer iheader
+	integer iyear
 	double precision verr
 	double precision time_start,time_end
 
@@ -166,10 +165,13 @@
 	  write(6,*) '==========================='
 	  write(6,*) 'start of time loop'
 	  write(6,*) '==========================='
-	  write(6,*) trim(header)
 	end if
 
-	do
+	do iyear=1,pyear
+
+	if( pyear > 1 .and. .not. bsilent ) then
+	  write(6,*) 'running perpetual year ',iyear
+	end if
 
 	do
 	  call copy_new2old
@@ -224,11 +226,17 @@
 	integer iheader
 	double precision verr
 
+        character*80, save :: header =                                  &
+     &             ' iterations                dtime'                   &
+     &          // '             date and time             verr'
+
 	iheader = 30*max(1,ifreq)
 
 	if( ifreq == 0 ) return
 
-	if( mod(irec,iheader) == 0 ) write(6,*) trim(header)
+	if( irec == 1 .or. mod(irec,iheader) == 0 ) then
+	  write(6,*) trim(header)
+	end if
 	bout = ( mod(irec,ifreq) == 0 )
 	if( bout ) write(6,*) irec,dtime,pline,sngl(verr)
 
