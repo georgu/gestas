@@ -16,7 +16,7 @@
 !    GNU General Public License for more details.
 !
 !    You should have received a copy of the GNU General Public License
-!    along with SHYFEM. Please see the file COPYING in the main directory.
+!    along with GESTAS. Please see the file COPYING in the main directory.
 !    If not, see <http://www.gnu.org/licenses/>.
 !
 !    Contributions to this file can be found below in the revision log.

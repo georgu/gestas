@@ -1,0 +1,138 @@
+
+#------------------------------------------------------------------------
+#
+#    Copyright (C) 1924-2026  Georg Umgiesser
+#
+#    This file is part of GESTAS
+#
+#    GESTAS is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    GESTAS is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with SHYFEM. Please see the file COPYING in the main directory.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#------------------------------------------------------------------------
+
+    This is the README file for the GESTAS Model
+
+    GESTAS - Geophysical EcoSystem and TrAnsport Simulator
+
+#------------------------------------------------------------------------
+
+    Contact:
+
+    Georg Umgiesser
+    Oceanography, ISMAR-CNR
+    Arsenale Tesa 104, Castello 2737/F
+    30122 Venezia
+    Italy
+
+    E-Mail : georg.umgiesser@cnr.it
+
+#------------------------------------------------------------------------
+
+    Description:
+
+    GESTAS is based on an idea and realization of ESTAS, a transport model
+    working on boxes, developed by Ali Erturk. However, the ESTAS model
+    is strongly interlinked with the biogeochemical model AQUABC. On the
+    other hand, GESTAS is working with different modules, ecological and
+    physical. At this point, modules to compute concentration advection
+    and water residence time computations are included, as well as the
+    ecological models AQUABC, WEUTRO, and BFM.
+
+    GESTAS takes the information about average values in boxes and fluxes
+    across sections between boxes. It then simulates the transport of
+    scalars and their reaction in case of ecological models. The box and
+    section information can be produced automatically through SHYFEM,
+    but is not limited to this, as long as the input files adhere to
+    the format needed by GESTAS.
+
+    Workflow:
+
+    The workflow consists basically of three steps:
+
+	1) create the boxes.txt file that contains all the
+	   information on how the boxes and sections are structured. What
+	   is needed is a GRD file that has as its element type the box
+	   number that the element is belonging to. Once this has been
+	   achieved standard SHYFEM tools like shybas and shyplot can
+	   be used to create the boxes.txt file and plot the information.
+
+	2) run SHYFEM to create the variables on boxes and the fluxes
+	   between these boxes. The parameters idtbox=time_step must be
+	   set. A typical value for a time step could be 1 hour (3600 s).
+	   The input to SHYFEM is the boxes.txt file.
+
+	3) run GESTAS and apply the desired module. Results will be
+	   presented in terms of time series of state variables, which
+	   can be elaborated and plotted further. The input to GESTAS
+	   are the files named boxes_*.txt.
+
+    The following modules have been implemented:
+
+	conz	simulate concentration transport between boxes. For
+		each of the n boundaries, one type of concentration
+		is released.  A last concentration n+1 is released on
+		all boundaries.
+
+	wrt	water residence (WRT), confinement, and age
+		simulation. Given a reset frequency, the WRT and
+		confinement is computed. Age is continuously calculated.
+
+	steady	computes the time how long the system needs to reach
+		steady state.
+
+	weutro	runs the WEUTRO ecological model (9 state variables).
+
+	aquabc	runs the AQUABC ecological model (32 state variables).
+
+	bfm	runs the BFM ecological model (not yet ready).
+
+    Credits:
+
+	Credits go to Ali Erturk, who had the idea of this type of
+	transport model. With him, also the first coupling of
+	GESTAS to AQUABC has been realized.
+
+	Credits also go to the OGS team (Donata Mealku Canu, Isabella
+	Scroccaro, Celia Laurent, Leslie Aveytua Alcazar) who enabled
+	me through partial funding to finish GESTAS and test it with
+	data coming from their applications.
+
+#------------------------------------------------------------------------
+
+Directory structure
+===================
+
+arc		archive of some files
+bin 		binary files and helper routines (both model and tools)
+src 		shyfem model files
+    aquabc 	contributed model components (ecological models, etc..)
+    bfm 	external tools developed by third party (gotm, etc..)
+    weutro	obsolete source files
+test	 	test cases for unit test and validation
+var		various tools and information
+
+Compiling the model
+===================
+
+You can compile everything from the SHYFEM directory by running the
+command "make". Available commands are:
+
+make		compiles the model
+make help	gives help on available make targets
+make compile	compiles the model
+make clean	deletes object and executable files in all subdirectories
+make cleanall	as clean, but cleans also libraries
+
+#------------------------------------------------------------------------
+

@@ -3,6 +3,8 @@
 *.o
 *.a
 .*.swp
+*.tmp
+*.bak
 
 arc/
 tmp/

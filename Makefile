@@ -14,6 +14,18 @@ default: compile
 compile:
 	cd src; make
 
+help:
+	@echo "available targets"
+	@echo "  help           this screen"
+	@echo "  compile        compiles program"
+	@echo "  clean          cleans directories"
+	@echo "  cleanall       thoroughly cleans directories"
+
 clean:
 	cd src; make clean
+	-rm -f *.tmp
+	-rm -f *.bak
+
+cleanall:
+	cd src; make cleanall
 

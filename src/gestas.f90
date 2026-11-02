@@ -16,7 +16,7 @@
 !    GNU General Public License for more details.
 !
 !    You should have received a copy of the GNU General Public License
-!    along with SHYFEM. Please see the file COPYING in the main directory.
+!    along with GESTAS. Please see the file COPYING in the main directory.
 !    If not, see <http://www.gnu.org/licenses/>.
 !
 !    Contributions to this file can be found below in the revision log.
@@ -35,6 +35,8 @@
 !
 ! consider rain and evaporation for volume error
 ! implement 3D
+! more boundaries on boxes on one open boundary of shyfem
+! unformatted read/write
 !
 ! revision log :
 !
@@ -472,16 +474,17 @@
 
 	character*(*) routine
 
-	character*50 copyright,acronym
+	character*50 copyright,acronym,spellout
 
-	acronym = ' '
 	copyright = 'Copyright (C) Georg Umgiesser 2024-2026'
+	acronym = 'GESTAS'
+	spellout = 'Geophysical EcoSystem and TrAnsport Simulator'
 
-        write(6,*) '---------------------------------------'
-        write(6,*) 'GESTAS' ! // ' - ' // trim(acronym)
+        write(6,*) '------------------------------------------------------'
+        write(6,*) trim(acronym)  // ' - ' // trim(spellout)
         write(6,*) copyright
         write(6,*) routine
-        write(6,*) '---------------------------------------'
+        write(6,*) '------------------------------------------------------'
 
 	end
 
@@ -501,7 +504,7 @@
 
         call clo_init('gestas','[box-files]','2.0')
 
-        call clo_add_info('box model for shyfem')
+        call clo_add_info('GESTAS box model for shyfem')
 
         call clo_add_sep('output options')
 

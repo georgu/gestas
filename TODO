@@ -1,0 +1,7 @@
+
+implement 3d
+more boundaries on boxes on one open boundary of shyfem
+unformatted read/write
+plot: only plot subset of boxes
+more strict volume check
+
