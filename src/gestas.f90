@@ -73,7 +73,9 @@
 	integer, save :: nsect = 0	!total number of sections
 	integer, save :: nosect = 0	!total number of OB sections
 	integer, save :: nbound = -1	!total number of OB boundaries
-	double precision, save :: dt = 0.
+
+	double precision, save :: dt = 0.	!time step used for scalars
+	double precision, save :: dtorig = 0.	!original time step of data
 
 	integer, save :: irec = 0
 
@@ -116,7 +118,7 @@
 	integer, save :: ifreq = -1		!frequency of output
 	integer, save :: imax = 0		!maximum number of time steps
 
-        character*80, save :: boxfiles = ' '
+        character*80, save :: simname = ' '
 
 	logical, save :: bconz = .false.
 	logical, save :: bwrt = .false.
@@ -161,6 +163,7 @@
 	call read_zinit
 	call scalar_init
 
+	dtorig = dt
 	if( .not. bquiet ) then
 	  write(6,*) 'running with time step ',dt
 
@@ -500,9 +503,11 @@
         implicit none
 
 	logical bnoadvect
+	logical test_file_exists
         integer nfiles
+	character*80 file
 
-        call clo_init('gestas','[box-files]','2.0')
+        call clo_init('gestas','sim-name','2.0')
 
         call clo_add_info('GESTAS box model for shyfem')
 
@@ -538,8 +543,10 @@
         call clo_show_next_options
 
         call clo_add_sep('additional information')
-        call clo_add_com('  if no box-files is given,' &
-     &			// ' standard boxes_*.txt are used')
+        call clo_add_com('  sim-name is the first part of the boxes files')
+        call clo_add_com('  looking for files sim-name.boxes.*.txt')
+        call clo_add_com('  -noadvect is simulating the boxes ' &
+     &				// 'as not connected lakes')
  
         call clo_parse_options
 
@@ -581,15 +588,22 @@
         call clo_get_option('pextra',pextra)
 
 	nfiles = clo_number_of_files()
-	if( nfiles > 0 ) then
-          call clo_get_file(1,boxfiles)
-	  write(6,*) 'box-files: ',trim(boxfiles)
-	  stop 'error stop gestas_init: box-files not yet ready'
+	if( nfiles /= 1 ) then
+	  call clo_usage
+	else
+          call clo_get_file(1,simname)
+	  file = trim(simname) // '.boxes.2d.txt'
+	  if( .not. test_file_exists(file) ) then
+	    write(6,*) 'simulation files are not existing: ',trim(simname)
+	    stop 'error stop gestas_init: no such simulation'
+	  end if
 	end if
 
         if( .not. bsilent ) then
           call gestas_copyright('gestas - box model for shyfem')
         end if
+
+	if( .not. bsilent ) write(6,*) 'running simulation: ',trim(simname)
 
 	end
 

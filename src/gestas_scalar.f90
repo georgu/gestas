@@ -36,6 +36,13 @@
 !
 ! more than one module can be run together
 !
+! bwrt 			water residence time
+! bconz 		concentrations
+! bsteady 		steady state
+! baqua_bc 		aquabc model
+! bweutro 		weutro model
+! bbfm  		bfm model
+!
 !------------------------------------------------------------
 
 !============================================================
@@ -48,14 +55,7 @@
 
 	integer, save :: ibstabtot = 0			!stability index box
 	double precision, save :: timestabtot = 0	!stability index time
-	double precision, save :: stabtot = 1.e+30	!stability index value
-
-	!logical, save :: bwrt = .true.		!water residence time
-	!logical, save :: bconz = .true.		!concentrations
-	!logical, save :: bbfm = .false.		!bfm model
-	!logical, save :: bsteady = .false.	!steady state
-	!logical, save :: baqua_bc = .false.	!aquabc model
-	!logical, save :: bweutro = .true.	!weutro model
+	double precision, save :: stabtot = 0.		!stability index value
 
 !============================================================
         end module boxes_scalar
@@ -117,11 +117,24 @@
 
 	implicit none
 
+	integer nrun
 	double precision atime
 	character*20 aline
 
+	nrun = 0
+	if( bwrt ) nrun = nrun + 1
+	if( bconz ) nrun = nrun + 1
+	if( bbfm ) nrun = nrun + 1
+	if( bsteady ) nrun = nrun + 1
+	if( baquabc ) nrun = nrun + 1
+	if( bweutro ) nrun = nrun + 1
+
 	if( .not. bquiet ) then
-	  write(6,*) 'the following scalar modules have been run:'
+	  if( nrun > 0 ) then
+	    write(6,*) 'the following scalar modules have been run:'
+	  else
+	    write(6,*) 'no scalar modules have been run'
+	  end if
 	end if
 
 	if( bwrt ) call wrt_finalize
@@ -134,8 +147,10 @@
         atime = atime0 + timestabtot
         call date_format(atime,aline)
 
-	if( .not. bsilent ) write(6,*) 'minimum stability index: ',stabtot
-	if( bverbose ) write(6,*) 'box ',ibstabtot,'   time ',trim(aline)
+	if( nrun > 0 ) then
+	  if( .not. bsilent ) write(6,*) 'maximum stability index: ',stabtot
+	  if( bverbose ) write(6,*) 'box ',ibstabtot,'   time ',trim(aline)
+	end if
 
 	end
 	
@@ -143,7 +158,7 @@
 !************************************************************
 !************************************************************
 
-	subroutine scalar_stability(stabmin)
+	subroutine scalar_stability(stabmax)
 
 ! computes stabilty index for boxes
 
@@ -152,11 +167,11 @@
 
 	implicit none
 
-	double precision stabmin
+	double precision stabmax
 
 	integer is,ib
 	integer if,it
-	integer ibstabmin
+	integer ibstabmax
 	real vaux,faux,stab,alpha
 	double precision pos,neg
 	double precision fluxbox(2,-nosect:nbox)
@@ -180,30 +195,20 @@
           fluxbox(2,it) = fluxbox(2,it) + dt*neg
 	end do
 
-	stabmin = 1.e+30
-	ibstabmin = 0
+	stabmax = 0.
+	ibstabmax = 0
 	do ib = 1,nbox
 	  alpha = dt * qin(ib) / vnew(ib)
-	  vaux = min(vold(ib),vnew(ib))
-	  faux = max(fluxbox(1,ib),fluxbox(2,ib))
-	  faux = abs(faux)
-	  stab = vaux/faux
-	  if( stab < stabmin ) then
-	    stabmin = stab
-	    ibstabmin = ib
-	  end if
-	  if( alpha > 1 ) then
-	    write(6,*) 'stability error: alpha > 1 ',alpha
-	    write(6,*) stime
-	    write(6,*) fluxbox(1,ib),vnew(ib)
-	    stop 'error stop scalar_stability: alpha > 1'
+	  if( alpha > stabmax ) then
+	    stabmax = alpha
+	    ibstabmax = ib
 	  end if
 	  !write(6,*) 'stability: ',ib,vaux,faux,stab
 	end do
 
-	if( stabmin < stabtot ) then
-	  stabtot = stabmin
-	  ibstabtot = ibstabmin
+	if( stabmax > stabtot ) then
+	  stabtot = stabmax
+	  ibstabtot = ibstabmax
 	  timestabtot = dtime
 	end if
 
@@ -232,10 +237,10 @@
 
 	call scalar_stability(stab)
 
-	if( stab < 1. ) then
+	if( stab > 1. ) then
 	  write(6,*) 'stability index: ',stab
 	  write(6,*) 'not yet ready for substepping...'
-	  stop 'error stop scalar_advect: stab < 1'
+	  stop 'error stop scalar_advect: stab > 1'
 	end if
 
 	do is=1,nscal

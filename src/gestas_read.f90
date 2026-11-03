@@ -49,6 +49,7 @@
 
 	iu = 11
 	file='boxes_2d.txt'
+	file=trim(simname) // '.boxes.2d.txt'
 	call check_file_exists(file)
 	open(iu,file=file,status='old',form='formatted')
 	call check_file_header(iu,2,nvers,ierr)
@@ -130,6 +131,7 @@
 	if( iu == 0 ) then
 	  iu = 2
 	  file='boxes_2d.txt'
+	  file = trim(simname) // '.boxes.2d.txt'
 	  call check_file_exists(file)
 	  open(iu,file=file,status='old',form='formatted')
 	  call check_file_header(iu,2,nvers,ierr)
@@ -261,6 +263,7 @@
 	if( iu == 0 ) then
 	  iu = 1
 	  file='boxes_meteo.txt'
+	  file = trim(simname) // '.boxes.meteo.txt'
 	  call check_file_exists(file)
 	  open(iu,file=file,status='old',form='formatted')
 	  call check_file_header(iu,1,nvers,ierr)
@@ -361,6 +364,23 @@
 
 !************************************************************
 
+	function test_file_exists(file)
+
+	implicit none
+
+	logical test_file_exists
+	character*(*) file
+
+	logical bex
+
+	inquire(file=file,exist=bex)
+
+	test_file_exists = bex
+
+	end
+
+!************************************************************
+
         subroutine check_time
 
         use boxes
@@ -401,23 +421,25 @@
 
 	subroutine get_file_name(ftype,file)
 
+	use boxes
+
 	implicit none
 
 	integer ftype
 	character*(*) file
 
 	if( ftype == 0 ) then
-	  file = 'boxes_init.txt'
+	  file = trim(simname) // '.boxes.init.txt'
 	else if( ftype == 1 ) then
-	  file = 'boxes_meteo.txt'
+	  file = trim(simname) // '.boxes.meteo.txt'
 	else if( ftype == 2 ) then
-	  file = 'boxes_2d.txt'
+	  file = trim(simname) // '.boxes.2d.txt'
 	else if( ftype == 3 ) then
-	  file = 'boxes_3d.txt'
+	  file = trim(simname) // '.boxes.3d.txt'
 	else if( ftype == 7 ) then
-	  file = 'boxes_geom.txt'
+	  file = trim(simname) // '.boxes.geom.txt'
 	else if( ftype == 8 ) then
-	  file = 'boxes_stats.txt'
+	  file = trim(simname) // '.boxes.stats.txt'
 	else
 	  write(6,*) 'ftype = ',ftype
 	  stop 'error stop get_file_name: unknown file type'
@@ -441,6 +463,7 @@
 	integer i,ii,is_aux
 
 	file='boxes_stats.txt'
+	file = trim(simname) // '.boxes.stats.txt'
 	call check_file_exists(file)
 	open(iu,file=file,status='old',form='formatted',err=99)
 	call check_file_header(iu,8,nvers,ierr)
@@ -524,6 +547,7 @@
 	integer i,ierr
 
 	file='boxes_init.txt'
+	file = trim(simname) // '.boxes.init.txt'
 	call check_file_exists(file)
 	open(iu,file=file,status='old',form='formatted')
 	call check_file_header(iu,0,nvers,ierr)
