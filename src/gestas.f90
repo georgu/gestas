@@ -526,7 +526,7 @@
         call clo_add_option('aquabc',.false.,'run aquabc module')
         call clo_add_option('bfm',.false.,'run bfm module')
         call clo_add_option('wrt freq',-1,'run wrt module ' &
-     &				// 'with reset frequency freq')
+     &				// 'with reset frequency freq [days]')
         call clo_add_option('conz',.false.,'run conz module')
         call clo_add_option('steady',.false.,'run steady state module')
 

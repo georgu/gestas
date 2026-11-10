@@ -123,6 +123,7 @@
         call make_max_file('fort.201-fort.',200,9,text)
 
 	write(6,*) 'water residence time (WRT) module has been run'
+	write(6,*) '  reset frequency [days]: ',wrt_freq
 	if( bgoro ) then
 	  write(6,*) '  special setting for Goro has been used'
 	end if

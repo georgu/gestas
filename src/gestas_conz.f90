@@ -88,7 +88,7 @@
 
 	if( bquiet ) return
 
-        call make_max_file('fort.401-fort.',200,nscal+1,text)
+        call make_max_file('fort.401-fort.',400,nscal+1,text)
 
         write(6,*) 'concentration module has been run'
         write(6,*) '  results for conz module are in '//trim(text)

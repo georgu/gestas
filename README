@@ -70,12 +70,16 @@
 	2) run SHYFEM to create the variables on boxes and the fluxes
 	   between these boxes. The parameters idtbox=time_step must be
 	   set. A typical value for a time step could be 1 hour (3600 s).
-	   The input to SHYFEM is the boxes.txt file.
+	   The input to SHYFEM is the boxes.txt file. This file has to
+	   be given with boxes='boxfile' in section $name.
+	   running SHYFEM produces various files that are named
+	   sim.boxes.what.txt where sim is the name of the simulation
+	   and what is one of 2d|3d|meteo|vertical|stats|geom|init.
 
 	3) run GESTAS and apply the desired module. Results will be
 	   presented in terms of time series of state variables, which
 	   can be elaborated and plotted further. The input to GESTAS
-	   are the files named boxes_*.txt.
+	   are the files mentioned above sim.boxes.what.txt.
 
     The following modules have been implemented:
 
